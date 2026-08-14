@@ -1,27 +1,120 @@
-import { useEffect, useState } from "react";
+import React, { useState, useEffect } from 'react';
+import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
+import AiChatbotDrawer from './components/AiChatbotDrawer';
 
-function App() {
-  const [message, setMessage] = useState("Connecting...");
+// Part 1: Career Compass Pages
+import CareerOverview from './pages/CareerOverview';
+import SkillAnalysis from './pages/SkillAnalysis';
+import GoalSkillGap from './pages/GoalSkillGap';
+import CareerRoadmapPage from './pages/CareerRoadmapPage';
+import ProjectRecommendations from './pages/ProjectRecommendations';
+import CareerBranchExplorer from './pages/CareerBranchExplorer';
+
+// Part 2: Opportunity Pages
+import RecommendedOpportunities from './pages/RecommendedOpportunities';
+import OpportunitiesHub from './pages/OpportunitiesHub';
+import MyOpportunitiesJourney from './pages/MyOpportunitiesJourney';
+
+// Part 3: Academic Balance Page
+import AcademicBalancePage from './pages/AcademicBalancePage';
+
+// Teacher Pages
+import TeacherPublishPage from './pages/TeacherPublishPage';
+import TeacherAnalyticsPage from './pages/TeacherAnalyticsPage';
+
+export default function App() {
+  const [activeTab, setActiveTab] = useState('compass_overview');
+  const [currentRole, setRole] = useState('student'); // 'student' | 'teacher'
+  const [theme, setTheme] = useState('dark');
+  const [isAiChatOpen, setIsAiChatOpen] = useState(false);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/hello/")
-      .then((response) => response.json())
-      .then((data) => {
-        setMessage(data.message);
-      })
-      .catch((error) => {
-        console.error(error);
-        setMessage("Connection failed!");
-      });
-  }, []);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
+  const renderActivePage = () => {
+    switch (activeTab) {
+      // Part 1: Career Compass
+      case 'compass_overview':
+        return <CareerOverview onNavigate={setActiveTab} onOpenAiChat={() => setIsAiChatOpen(true)} />;
+      case 'compass_skills':
+        return <SkillAnalysis />;
+      case 'compass_gaps':
+        return <GoalSkillGap onOpenAiChat={() => setIsAiChatOpen(true)} />;
+      case 'compass_roadmap':
+        return <CareerRoadmapPage />;
+      case 'compass_projects':
+        return <ProjectRecommendations />;
+      case 'compass_branches':
+        return <CareerBranchExplorer />;
+
+      // Part 2: Opportunities
+      case 'opp_recommended':
+        return <RecommendedOpportunities />;
+      case 'opp_catalog':
+        return <OpportunitiesHub currentRole={currentRole} />;
+      case 'opp_saved_registered':
+      case 'opp_feedback':
+        return <MyOpportunitiesJourney />;
+
+      // Part 3: Academic Balance
+      case 'academic_balance':
+        return <AcademicBalancePage />;
+
+      // Teacher Tools
+      case 'teacher_publish':
+        return <TeacherPublishPage />;
+      case 'teacher_analytics':
+        return <TeacherAnalyticsPage />;
+
+      default:
+        return <CareerOverview onNavigate={setActiveTab} onOpenAiChat={() => setIsAiChatOpen(true)} />;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <h1 className="text-4xl font-bold text-blue-500">
-        {message}
-      </h1>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Top sticky navbar */}
+      <Navbar
+        currentRole={currentRole}
+        setRole={setRole}
+        theme={theme}
+        toggleTheme={toggleTheme}
+        onOpenAiChat={() => setIsAiChatOpen(true)}
+      />
+
+      {/* Main Body */}
+      <div style={{
+        display: 'flex',
+        gap: '24px',
+        maxWidth: '1440px',
+        width: '100%',
+        margin: '0 auto',
+        padding: '0 24px 40px 24px',
+        flex: 1
+      }}>
+        <Sidebar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          currentRole={currentRole}
+          onOpenAiChat={() => setIsAiChatOpen(true)}
+        />
+
+        <main style={{ flex: 1, minWidth: 0 }}>
+          {renderActivePage()}
+        </main>
+      </div>
+
+      {/* Qwen3 AI Assistant Drawer */}
+      <AiChatbotDrawer
+        isOpen={isAiChatOpen}
+        onClose={() => setIsAiChatOpen(false)}
+      />
     </div>
   );
 }
-
-export default App;
