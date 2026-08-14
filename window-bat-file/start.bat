@@ -8,7 +8,7 @@ echo.
 
 REM Start Django Backend
 echo Starting Django backend...
-start "Django Backend" cmd /k "cd /d D:\Hackathon\back-end && call venv\Scripts\activate.bat && python manage.py runserver"
+start "Django Backend" cmd /k "cd /d D:\Hackathon\back-end && call .venv\Scripts\activate.bat && python manage.py runserver"
 
 REM Start React Frontend
 echo Starting React frontend...
