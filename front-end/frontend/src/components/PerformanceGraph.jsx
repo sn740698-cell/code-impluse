@@ -4,12 +4,12 @@ import { getStudentTelemetry } from '../services/api';
 
 export default function PerformanceGraph({ data: initialData, title = "Overall Performance & Skill Progression", height = 240, studentProfile }) {
   const [points, setPoints] = useState(initialData || [
-    { month: 'Jan', readiness: 42, gpa: 3.65, skills: 35 },
-    { month: 'Feb', readiness: 50, gpa: 3.70, skills: 45 },
-    { month: 'Mar', readiness: 58, gpa: 3.75, skills: 55 },
-    { month: 'Apr', readiness: 65, gpa: 3.80, skills: 62 },
-    { month: 'May', readiness: 74, gpa: 3.82, skills: 70 },
-    { month: 'Jun', readiness: 84, gpa: 3.84, skills: 78 }
+    { month: 'Jan', readiness: 42, gpa: 9.15, skills: 35 },
+    { month: 'Feb', readiness: 50, gpa: 9.25, skills: 45 },
+    { month: 'Mar', readiness: 58, gpa: 9.38, skills: 55 },
+    { month: 'Apr', readiness: 65, gpa: 9.50, skills: 62 },
+    { month: 'May', readiness: 74, gpa: 9.55, skills: 70 },
+    { month: 'Jun', readiness: 84, gpa: 9.60, skills: 78 }
   ]);
 
   const [activeMetric, setActiveMetric] = useState('readiness'); // readiness, skills, gpa
@@ -45,7 +45,7 @@ export default function PerformanceGraph({ data: initialData, title = "Overall P
           month: m,
           readiness: Math.round(baseR + (targetReadiness - baseR) * factor),
           skills: Math.round(baseR - 5 + (targetReadiness - baseR + 5) * factor),
-          gpa: Number((3.50 + 0.34 * factor).toFixed(2))
+          gpa: Number((8.75 + 0.85 * factor).toFixed(2))
         };
       });
       setPoints(computed);
@@ -69,8 +69,8 @@ export default function PerformanceGraph({ data: initialData, title = "Overall P
 
   // Metric scale bounds
   const isGpa = activeMetric === 'gpa';
-  const maxVal = isGpa ? 4.0 : 100;
-  const minVal = isGpa ? 3.0 : 0;
+  const maxVal = isGpa ? 10.0 : 100;
+  const minVal = isGpa ? 6.0 : 0;
 
   const getVal = (pt) => pt[activeMetric];
 
@@ -223,7 +223,7 @@ export default function PerformanceGraph({ data: initialData, title = "Overall P
           </defs>
 
           {/* Grid Lines & Y-Axis Scale */}
-          {(isGpa ? [3.0, 3.25, 3.5, 3.75, 4.0] : [0, 25, 50, 75, 100]).map((val, idx) => {
+          {(isGpa ? [6.0, 7.0, 8.0, 9.0, 10.0] : [0, 25, 50, 75, 100]).map((val, idx) => {
             const normalized = (val - minVal) / (maxVal - minVal);
             const y = paddingTop + drawHeight - normalized * drawHeight;
             return (

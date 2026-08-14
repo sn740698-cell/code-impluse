@@ -30,7 +30,7 @@ export default function AcademicTracker() {
           </p>
         </div>
         <span className="badge badge-emerald" style={{ fontSize: '0.85rem', padding: '6px 12px' }}>
-          <Award size={16} /> Cumulative GPA: 3.84 / 4.0
+          <Award size={16} /> Cumulative GPA: 9.60 / 10.0
         </span>
       </div>
 
@@ -38,9 +38,9 @@ export default function AcademicTracker() {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '18px' }}>
         
         <div className="glass-card" style={{ padding: '20px' }}>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>CURRENT SEMESTER SGPA</div>
-          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--accent-cyan)' }}>3.88</div>
-          <div style={{ fontSize: '0.72rem', color: 'var(--accent-emerald)' }}>↑ +0.08 higher than Sem 3</div>
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontWeight: 600 }}>CURRENT SEMESTER SGPA (OUT OF 10)</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--accent-cyan)' }}>9.70 / 10.0</div>
+          <div style={{ fontSize: '0.72rem', color: 'var(--accent-emerald)' }}>↑ +0.20 higher than Sem 3</div>
         </div>
 
         <div className="glass-card" style={{ padding: '20px' }}>
