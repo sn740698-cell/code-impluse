@@ -185,7 +185,7 @@ export default function App() {
           {/* Top sticky navbar */}
           <div style={{ position: 'relative', zIndex: 10 }}>
             <Navbar
-              currentUser={currentUser}
+              currentUser={studentProfile || currentUser}
               onLogout={handleLogout}
               theme={theme}
               toggleTheme={toggleTheme}
