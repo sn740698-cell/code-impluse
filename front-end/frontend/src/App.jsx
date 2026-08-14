@@ -197,7 +197,7 @@ export default function App() {
         <LoginPage onLogin={handleLogin} />
       ) : currentUser.role === 'student' && !hasCompletedOnboarding ? (
         /* Render Student Onboarding Flow right after login */
-        <StudentOnboarding onComplete={handleOnboardingComplete} />
+        <StudentOnboarding currentUser={currentUser} onComplete={handleOnboardingComplete} />
       ) : (
         <>
           {/* Top sticky navbar */}
