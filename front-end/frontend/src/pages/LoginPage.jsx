@@ -7,16 +7,27 @@ import {
   Lock, 
   ArrowRight, 
   Sparkles,
-  ShieldCheck
+  ShieldCheck,
+  Plus,
+  Trash2,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
-import { loginApi } from '../services/api';
+import { loginApi, setStudentCareer } from '../services/api';
 
 export default function LoginPage({ onLogin }) {
   const [role, setRole] = useState('student'); // 'student' | 'teacher'
   const [name, setName] = useState('Alex Rivera');
   const [email, setEmail] = useState('alex.rivera@university.edu');
   const [password, setPassword] = useState('••••••••••••');
-  const [rememberMe, setRememberMe] = useState(true);
+  const [targetCareer, setTargetCareer] = useState('Cybersecurity Engineer');
+  const [showSkillCustomizer, setShowSkillCustomizer] = useState(false);
+  const [customSkills, setCustomSkills] = useState([
+    { name: 'Python Programming', proficiency: 65 },
+    { name: 'Linux Administration', proficiency: 30 },
+    { name: 'Networking Fundamentals', proficiency: 25 }
+  ]);
+  const [newSkill, setNewSkill] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleQuickFillStudent = () => {
@@ -24,6 +35,7 @@ export default function LoginPage({ onLogin }) {
     setName('Alex Rivera');
     setEmail('alex.rivera@university.edu');
     setPassword('student123');
+    setTargetCareer('Cybersecurity Engineer');
   };
 
   const handleQuickFillTeacher = () => {
@@ -33,26 +45,41 @@ export default function LoginPage({ onLogin }) {
     setPassword('teacher123');
   };
 
+  const handleAddSkill = (e) => {
+    e.preventDefault();
+    if (!newSkill.trim()) return;
+    if (!customSkills.some(s => s.name.toLowerCase() === newSkill.trim().toLowerCase())) {
+      setCustomSkills([...customSkills, { name: newSkill.trim(), proficiency: 50 }]);
+    }
+    setNewSkill('');
+  };
+
+  const handleRemoveSkill = (index) => {
+    setCustomSkills(customSkills.filter((_, idx) => idx !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+
+    const avgProf = customSkills.length > 0
+      ? Math.round(customSkills.reduce((acc, s) => acc + s.proficiency, 0) / customSkills.length)
+      : 58;
+
+    const studentProfilePayload = {
+      name: name || (role === 'student' ? 'Alex Rivera' : 'Prof. Sarah Jenkins'),
+      email,
+      role,
+      target_career: targetCareer,
+      career_readiness: avgProf,
+      skills: customSkills
+    };
+
     try {
       const user = await loginApi({ email, password, role });
-      if (user) {
-        onLogin({ ...user, name: name || user.name });
-      } else {
-        onLogin({
-          name: name || (role === 'student' ? 'Alex Rivera' : 'Prof. Sarah Jenkins'),
-          email,
-          role
-        });
-      }
+      onLogin({ ...(user || {}), ...studentProfilePayload });
     } catch {
-      onLogin({
-        name: name || (role === 'student' ? 'Alex Rivera' : 'Prof. Sarah Jenkins'),
-        email,
-        role
-      });
+      onLogin(studentProfilePayload);
     } finally {
       setIsLoading(false);
     }
@@ -69,14 +96,14 @@ export default function LoginPage({ onLogin }) {
       zIndex: 10
     }}>
       <div className="clean-card" style={{
-        width: '440px',
+        width: '480px',
         maxWidth: '100%',
         padding: '36px',
         borderRadius: 'var(--radius-lg)',
         boxShadow: 'var(--shadow-dropdown)'
       }}>
         {/* Brand Header */}
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
           <div style={{
             width: '48px',
             height: '48px',
@@ -94,174 +121,225 @@ export default function LoginPage({ onLogin }) {
             AI Career Compass
           </h2>
           <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: 0 }}>
-            Sign in to access personalized career guidance & opportunities
+            Sign in with your customized carrier skills & target career goal
           </p>
         </div>
 
-        {/* Role Tab Selector */}
+        {/* Role Switcher Pills */}
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '6px',
+          display: 'flex',
           background: 'var(--bg-input)',
           padding: '4px',
-          borderRadius: 'var(--radius-sm)',
-          marginBottom: '24px'
+          borderRadius: 'var(--radius-pill)',
+          marginBottom: '20px',
+          border: '1px solid var(--border-clean)'
         }}>
           <button
             type="button"
-            onClick={() => { setRole('student'); setEmail('alex.rivera@university.edu'); }}
+            onClick={() => { setRole('student'); setName('Alex Rivera'); }}
             style={{
+              flex: 1,
               padding: '8px',
-              borderRadius: 'var(--radius-sm)',
               border: 'none',
-              fontSize: '0.84rem',
-              fontWeight: 600,
+              borderRadius: 'var(--radius-pill)',
+              background: role === 'student' ? 'var(--color-brand-primary)' : 'transparent',
+              color: role === 'student' ? '#ffffff' : 'var(--text-muted)',
+              fontSize: '0.82rem',
+              fontWeight: 700,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '6px',
-              background: role === 'student' ? 'var(--color-brand-primary)' : 'transparent',
-              color: role === 'student' ? '#ffffff' : 'var(--text-muted)'
+              transition: 'all 0.2s ease'
             }}
           >
-            <GraduationCap size={16} /> Student
+            <GraduationCap size={16} /> Student Portal
           </button>
-
           <button
             type="button"
-            onClick={() => { setRole('teacher'); setEmail('prof.sarah@university.edu'); }}
+            onClick={() => { setRole('teacher'); setName('Prof. Sarah Jenkins'); }}
             style={{
+              flex: 1,
               padding: '8px',
-              borderRadius: 'var(--radius-sm)',
               border: 'none',
-              fontSize: '0.84rem',
-              fontWeight: 600,
+              borderRadius: 'var(--radius-pill)',
+              background: role === 'teacher' ? 'var(--color-purple)' : 'transparent',
+              color: role === 'teacher' ? '#ffffff' : 'var(--text-muted)',
+              fontSize: '0.82rem',
+              fontWeight: 700,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               gap: '6px',
-              background: role === 'teacher' ? 'var(--color-purple)' : 'transparent',
-              color: role === 'teacher' ? '#ffffff' : 'var(--text-muted)'
+              transition: 'all 0.2s ease'
             }}
           >
-            <UserCheck size={16} /> Faculty
+            <UserCheck size={16} /> Faculty Advisor
           </button>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {/* Quick Fill Pills */}
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
+          <button
+            type="button"
+            onClick={handleQuickFillStudent}
+            className="btn-ghost"
+            style={{ flex: 1, fontSize: '0.74rem', padding: '6px 10px', background: 'var(--bg-input)' }}
+          >
+            ⚡ Student Demo
+          </button>
+          <button
+            type="button"
+            onClick={handleQuickFillTeacher}
+            className="btn-ghost"
+            style={{ flex: 1, fontSize: '0.74rem', padding: '6px 10px', background: 'var(--bg-input)' }}
+          >
+            ⚡ Faculty Demo
+          </button>
+        </div>
+
+        {/* Main Login Form */}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          
           <div>
-            <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
-              Full Name
-            </label>
-            <div style={{ position: 'relative' }}>
-              <UserCheck size={16} color="var(--text-subtle)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
-              <input
-                type="text"
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="clean-input"
-                style={{ paddingLeft: '40px' }}
-                placeholder="Your Full Name"
-              />
-            </div>
+            <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Full Name</label>
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="clean-input"
+              placeholder="e.g. Alex Rivera"
+            />
           </div>
 
           <div>
-            <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
-              University Email Address
-            </label>
+            <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Email Address</label>
             <div style={{ position: 'relative' }}>
-              <Mail size={16} color="var(--text-subtle)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="clean-input"
-                style={{ paddingLeft: '40px' }}
+                style={{ paddingLeft: '38px' }}
                 placeholder="name@university.edu"
               />
+              <Mail size={16} color="var(--text-subtle)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
             </div>
           </div>
 
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-              <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)' }}>Password</label>
-              <a href="#forgot" onClick={(e) => e.preventDefault()} style={{ fontSize: '0.75rem', color: 'var(--color-brand-primary)', textDecoration: 'none' }}>
-                Forgot Password?
-              </a>
+          {/* Customized Carrier Skills Accordion (For Student Login) */}
+          {role === 'student' && (
+            <div style={{ background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-clean)', overflow: 'hidden' }}>
+              <button
+                type="button"
+                onClick={() => setShowSkillCustomizer(!showSkillCustomizer)}
+                className="btn-ghost"
+                style={{
+                  width: '100%',
+                  padding: '10px 14px',
+                  display: 'flex',
+                  justify: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '0.82rem',
+                  color: 'var(--color-brand-primary)',
+                  fontWeight: 700
+                }}
+              >
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Sparkles size={14} /> Customized Carrier Skills & Target Goal
+                </span>
+                {showSkillCustomizer ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              </button>
+
+              {showSkillCustomizer && (
+                <div style={{ padding: '14px', borderTop: '1px solid var(--border-clean)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Target Career Goal</label>
+                    <input
+                      type="text"
+                      value={targetCareer}
+                      onChange={(e) => setTargetCareer(e.target.value)}
+                      className="clean-input"
+                      placeholder="e.g. Cybersecurity Engineer, AI Data Scientist"
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>Carrier Skills & Proficiencies</label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '150px', overflowY: 'auto' }}>
+                      {customSkills.map((sk, idx) => (
+                        <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-card)', padding: '6px 10px', borderRadius: 'var(--radius-sm)', fontSize: '0.78rem' }}>
+                          <span>{sk.name}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontWeight: 700, color: 'var(--color-brand-primary)' }}>{sk.proficiency}%</span>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveSkill(idx)}
+                              className="btn-ghost"
+                              style={{ padding: '2px', color: 'var(--color-rose)' }}
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Add New Custom Skill Input */}
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <input
+                      type="text"
+                      value={newSkill}
+                      onChange={(e) => setNewSkill(e.target.value)}
+                      placeholder="Add custom skill (e.g. Docker, Rust)"
+                      className="clean-input"
+                      style={{ padding: '6px 10px', fontSize: '0.78rem' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddSkill}
+                      className="btn-primary"
+                      style={{ padding: '6px 12px', fontSize: '0.76rem', gap: '4px' }}
+                    >
+                      <Plus size={13} /> Add
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
+          )}
+
+          <div>
+            <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Password</label>
             <div style={{ position: 'relative' }}>
-              <Lock size={16} color="var(--text-subtle)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="clean-input"
-                style={{ paddingLeft: '40px' }}
+                style={{ paddingLeft: '38px' }}
+                placeholder="Password"
               />
+              <Lock size={16} color="var(--text-subtle)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
             </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-            <input
-              type="checkbox"
-              id="remember"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-            />
-            <label htmlFor="remember" style={{ cursor: 'pointer' }}>Keep me logged in on this device</label>
           </div>
 
           <button
             type="submit"
+            disabled={isLoading}
             className="btn-primary"
-            style={{
-              padding: '12px',
-              fontSize: '0.9rem',
-              marginTop: '6px',
-              background: role === 'student' ? 'var(--color-brand-primary)' : 'var(--color-purple)'
-            }}
+            style={{ width: '100%', padding: '12px', fontSize: '0.9rem', marginTop: '6px' }}
           >
-            <span>Sign In to {role === 'student' ? 'Student Portal' : 'Faculty Dashboard'}</span>
-            <ArrowRight size={18} />
+            <span>{isLoading ? 'Authenticating...' : `Sign In to ${role === 'student' ? 'Student Workspace' : 'Faculty Advisor Portal'}`}</span>
+            <ArrowRight size={16} />
           </button>
         </form>
-
-        {/* Demo Quick Fill Actions */}
-        <div style={{
-          marginTop: '24px',
-          paddingTop: '20px',
-          borderTop: '1px solid var(--border-clean)',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-subtle)', marginBottom: '10px' }}>
-            DEMO LOGIN CREDENTIALS
-          </div>
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-            <button
-              onClick={handleQuickFillStudent}
-              className="btn-ghost"
-              style={{ fontSize: '0.75rem', padding: '6px 12px', background: 'rgba(59, 130, 246, 0.1)', color: '#60a5fa' }}
-            >
-              Fill Student Demo
-            </button>
-
-            <button
-              onClick={handleQuickFillTeacher}
-              className="btn-ghost"
-              style={{ fontSize: '0.75rem', padding: '6px 12px', background: 'rgba(139, 92, 246, 0.1)', color: '#c084fc' }}
-            >
-              Fill Faculty Demo
-            </button>
-          </div>
-        </div>
 
       </div>
     </div>
