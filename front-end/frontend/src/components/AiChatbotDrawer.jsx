@@ -206,7 +206,7 @@ export default function AiChatbotDrawer({ isOpen, onClose, studentProfile }) {
             </div>
             <div>
               <h3 style={{ fontSize: '1.05rem', margin: 0, fontWeight: 800, color: '#ffffff', letterSpacing: '0.02em' }}>
-                AI Career Compass Advisor
+                Mentora.edu.ai Advisor
               </h3>
               <p style={{ fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.95)', margin: 0, display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 600 }}>
                 <Sparkles size={13} color="#fde047" /> Ollama Qwen 3:8B & OpenRouter Engine

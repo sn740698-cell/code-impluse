@@ -120,8 +120,8 @@ export default function LoginPage({ onLogin }) {
           }}>
             <Compass size={26} color="#ffffff" />
           </div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 6px 0' }}>
-            AI Career Compass
+          <h2 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '0 0 6px 0', background: 'linear-gradient(90deg, #3b82f6, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            Mentora.edu.ai
           </h2>
           <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: 0 }}>
             Sign in to access Student Workspace or Faculty Advisory Portal

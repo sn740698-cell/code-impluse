@@ -47,8 +47,8 @@ export default function Navbar({ currentUser, onLogout, theme, toggleTheme, onOp
           <Compass size={22} color="#ffffff" />
         </div>
         <div>
-          <h1 style={{ fontSize: '1.15rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span>AI CAREER COMPASS</span>
+          <h1 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '8px', letterSpacing: '-0.02em' }}>
+            <span style={{ background: 'linear-gradient(90deg, #3b82f6, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Mentora.edu.ai</span>
             <span className="badge badge-purple" style={{ fontSize: '0.68rem' }}>
               {currentUser.role === 'student' ? 'Student Workspace' : 'Faculty Advisory Portal'}
             </span>
