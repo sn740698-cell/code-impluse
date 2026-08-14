@@ -446,10 +446,10 @@ export async function registerForOpportunity(id) {
   return fetchApi(`/opportunities/${id}/register/`, { method: 'POST' });
 }
 
-export async function sendChatMessage(message) {
+export async function sendChatMessage(message, profile = null) {
   const data = await fetchApi('/chat/', {
     method: 'POST',
-    body: JSON.stringify({ message })
+    body: JSON.stringify({ message, profile })
   });
 
   if (data?.response) {
@@ -457,14 +457,16 @@ export async function sendChatMessage(message) {
   }
 
   const lowerMsg = message.toLowerCase();
-  let aiReply = "I am your AI Career Compass & Opportunity Advisor powered by Qwen3.\n\n";
+  const studentName = profile?.name || MOCK_STUDENT_PROFILE.name;
+  const targetCareer = profile?.target_career || MOCK_STUDENT_PROFILE.target_career;
+  let aiReply = `Hello ${studentName}! I am your AI Career Compass Advisor powered by Qwen3.\n\n`;
 
   if (lowerMsg.includes("network") || lowerMsg.includes("gap")) {
-    aiReply += "• **Diagnostic Insight**: Your Networking proficiency is currently at 25% against an 80% requirement for Cybersecurity Engineer.\n• **Recommended Opportunity**: Attend the *Networking Fundamentals & Protocol Analysis Workshop* on Aug 22nd (91% match score).\n• **Prerequisite Warning**: Complete TCP/IP and OSI layer concepts before diving into penetration testing toolsets.";
+    aiReply += `• **Diagnostic Insight**: Your Networking proficiency is currently at 25% against an 80% requirement for ${targetCareer}.\n• **Recommended Opportunity**: Attend the *Networking Fundamentals & Protocol Analysis Workshop* on Aug 22nd (91% match score).\n• **Prerequisite Warning**: Complete TCP/IP and OSI layer concepts before diving into penetration testing toolsets.`;
   } else if (lowerMsg.includes("conflict") || lowerMsg.includes("exam") || lowerMsg.includes("dbms")) {
-    aiReply += "• **Workload & Schedule Balance**: You have an active DBMS Recovery Plan (7 hrs/week) and a DBMS Exam on Monday Aug 24th.\n• **AI Suggestion**: Attending the 3-hour Saturday workshop may impact your exam prep. Consider switching to the Wednesday 6:00 PM Async Webinar alternative!";
+    aiReply += `• **Workload & Schedule Balance**: You have an active DBMS Recovery Plan (7 hrs/week) and a DBMS Exam on Monday Aug 24th.\n• **AI Suggestion**: Attending the 3-hour Saturday workshop may impact your exam prep. Consider switching to the Wednesday 6:00 PM Async Webinar alternative!`;
   } else {
-    aiReply += `I've analyzed your profile (**Target Goal: Cybersecurity Engineer**, Current Readiness: **58%**).\n\nYour strongest skill is Python (65%), while your largest prerequisite gap is Networking (25%). How can I help you refine your roadmap today?`;
+    aiReply += `I've analyzed your profile (**Target Goal: ${targetCareer}**, Current Readiness: **58%**).\n\nYour strongest skill is Python (65%), while your largest prerequisite gap is Networking (25%). How can I help you refine your roadmap today?`;
   }
 
   return { response: aiReply, provider: "Qwen3 AI Career Engine" };

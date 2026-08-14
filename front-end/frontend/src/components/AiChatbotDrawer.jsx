@@ -96,12 +96,13 @@ function FormattedAiResponse({ text }) {
   );
 }
 
-export default function AiChatbotDrawer({ isOpen, onClose }) {
+export default function AiChatbotDrawer({ isOpen, onClose, studentProfile }) {
+  const initialName = studentProfile?.name || 'Alex';
   const [messages, setMessages] = useState([
     {
       id: 1,
       sender: 'bot',
-      text: "Hello Alex! I am your AI Career Compass Advisor. How can I assist your career path today?",
+      text: `Hello ${initialName}! I am your AI Career Compass Advisor. How can I assist your career path today?`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -138,7 +139,7 @@ export default function AiChatbotDrawer({ isOpen, onClose }) {
     setIsLoading(true);
 
     try {
-      const res = await sendChatMessage(query);
+      const res = await sendChatMessage(query, studentProfile);
       const botMsg = {
         id: Date.now() + 1,
         sender: 'bot',

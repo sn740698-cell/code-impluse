@@ -222,6 +222,7 @@ export default function App() {
             <AiChatbotDrawer
               isOpen={isAiChatOpen}
               onClose={() => setIsAiChatOpen(false)}
+              studentProfile={studentProfile || currentUser}
             />
           </div>
         </>
