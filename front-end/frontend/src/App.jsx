@@ -4,8 +4,14 @@ import Sidebar from './components/Sidebar';
 import AiChatbotDrawer from './components/AiChatbotDrawer';
 import GradientWaves from './components/GradientWaves';
 
-// Authentication Pages
+// Authentication & Onboarding Pages
 import LoginPage from './pages/LoginPage';
+import StudentOnboarding from './pages/StudentOnboarding';
+
+// Teacher Dashboard
+import TeacherDashboard from './pages/TeacherDashboard';
+import TeacherPublishPage from './pages/TeacherPublishPage';
+import TeacherAnalyticsPage from './pages/TeacherAnalyticsPage';
 
 // Part 1: Career Compass Pages
 import CareerOverview from './pages/CareerOverview';
@@ -23,16 +29,10 @@ import MyOpportunitiesJourney from './pages/MyOpportunitiesJourney';
 // Part 3: Academic Balance Page
 import AcademicBalancePage from './pages/AcademicBalancePage';
 
-// Teacher Pages
-import TeacherPublishPage from './pages/TeacherPublishPage';
-import TeacherAnalyticsPage from './pages/TeacherAnalyticsPage';
-
 export default function App() {
-  const [currentUser, setCurrentUser] = useState({
-    name: 'Alex Rivera',
-    email: 'alex.rivera@university.edu',
-    role: 'student' // 'student' | 'teacher'
-  });
+  const [currentUser, setCurrentUser] = useState(null); // null = show LoginPage
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+  const [studentProfile, setStudentProfile] = useState(null);
 
   const [activeTab, setActiveTab] = useState('compass_overview');
   const [theme, setTheme] = useState('dark');
@@ -49,21 +49,44 @@ export default function App() {
   const handleLogin = (user) => {
     setCurrentUser(user);
     if (user.role === 'teacher') {
-      setActiveTab('teacher_publish');
+      setActiveTab('teacher_dashboard');
     } else {
       setActiveTab('compass_overview');
     }
   };
 
+  const handleOnboardingComplete = (profileData) => {
+    setStudentProfile(profileData);
+    setHasCompletedOnboarding(true);
+    setActiveTab('compass_overview');
+  };
+
   const handleLogout = () => {
     setCurrentUser(null);
+    setHasCompletedOnboarding(false);
   };
 
   const renderActivePage = () => {
+    if (currentUser?.role === 'teacher') {
+      switch (activeTab) {
+        case 'teacher_dashboard':
+          return <TeacherDashboard />;
+        case 'teacher_publish':
+          return <TeacherPublishPage />;
+        case 'teacher_analytics':
+          return <TeacherAnalyticsPage />;
+        case 'opp_catalog':
+          return <OpportunitiesHub currentRole="teacher" />;
+        default:
+          return <TeacherDashboard />;
+      }
+    }
+
+    // Student Views
     switch (activeTab) {
       // Part 1: Career Compass
       case 'compass_overview':
-        return <CareerOverview onNavigate={setActiveTab} onOpenAiChat={() => setIsAiChatOpen(true)} />;
+        return <CareerOverview studentProfile={studentProfile} onNavigate={setActiveTab} onOpenAiChat={() => setIsAiChatOpen(true)} />;
       case 'compass_skills':
         return <SkillAnalysis />;
       case 'compass_gaps':
@@ -79,7 +102,7 @@ export default function App() {
       case 'opp_recommended':
         return <RecommendedOpportunities />;
       case 'opp_catalog':
-        return <OpportunitiesHub currentRole={currentUser?.role} />;
+        return <OpportunitiesHub currentRole="student" />;
       case 'opp_saved_registered':
       case 'opp_feedback':
         return <MyOpportunitiesJourney />;
@@ -88,14 +111,8 @@ export default function App() {
       case 'academic_balance':
         return <AcademicBalancePage />;
 
-      // Teacher Tools
-      case 'teacher_publish':
-        return <TeacherPublishPage />;
-      case 'teacher_analytics':
-        return <TeacherAnalyticsPage />;
-
       default:
-        return <CareerOverview onNavigate={setActiveTab} onOpenAiChat={() => setIsAiChatOpen(true)} />;
+        return <CareerOverview studentProfile={studentProfile} onNavigate={setActiveTab} onOpenAiChat={() => setIsAiChatOpen(true)} />;
     }
   };
 
@@ -137,6 +154,9 @@ export default function App() {
       {/* Render Login Page if User is not logged in */}
       {!currentUser ? (
         <LoginPage onLogin={handleLogin} />
+      ) : currentUser.role === 'student' && !hasCompletedOnboarding ? (
+        /* Render Student Onboarding Flow right after login */
+        <StudentOnboarding onComplete={handleOnboardingComplete} />
       ) : (
         <>
           {/* Top sticky navbar */}

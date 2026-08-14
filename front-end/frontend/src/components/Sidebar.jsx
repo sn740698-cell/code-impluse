@@ -16,7 +16,8 @@ import {
   LineChart, 
   Bot,
   UserCheck,
-  Layers
+  Layers,
+  Users
 } from 'lucide-react';
 
 export default function Sidebar({ activeTab, setActiveTab, currentUser, onOpenAiChat }) {
@@ -43,7 +44,8 @@ export default function Sidebar({ activeTab, setActiveTab, currentUser, onOpenAi
   ];
 
   const teacherItems = [
-    { id: 'teacher_publish', label: 'Post Opportunity (17 Fields)', icon: PlusCircle, badge: 'Faculty' },
+    { id: 'teacher_dashboard', label: 'Faculty Dashboard & Roster', icon: Users, badge: 'Active' },
+    { id: 'teacher_publish', label: 'Post Opportunity (17 Fields)', icon: PlusCircle },
     { id: 'teacher_analytics', label: 'Opportunity Analytics', icon: LineChart },
     { id: 'opp_catalog', label: 'All Published Opportunities', icon: Briefcase }
   ];
