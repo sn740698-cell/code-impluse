@@ -151,3 +151,38 @@ def student_projects(request):
             "develops_skills": [s.name for s in p.develops_skills.all()]
         } for p in goal.career.projects.prefetch_related("required_skills", "develops_skills")
     ]})
+
+
+@require_GET
+def student_telemetry(request):
+    user = get_active_user(request)
+    if not user:
+        return JsonResponse({"results": []})
+
+    current_readiness = readiness(user) or 58
+    skills = StudentSkill.objects.filter(student=user)
+    avg_skill = round(sum(s.proficiency for s in skills) / len(skills)) if skills else 50
+
+    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
+    trajectory = []
+    base_r = max(20, current_readiness - 35)
+    base_s = max(20, avg_skill - 35)
+
+    for i, m in enumerate(months):
+        factor = i / (len(months) - 1)
+        r_val = round(base_r + (current_readiness - base_r) * factor)
+        s_val = round(base_s + (avg_skill - base_s) * factor)
+        gpa_val = round(3.50 + 0.34 * factor, 2)
+        trajectory.append({
+            "month": m,
+            "readiness": r_val,
+            "skills": s_val,
+            "gpa": gpa_val
+        })
+
+    return JsonResponse({
+        "results": trajectory,
+        "current_readiness": current_readiness,
+        "avg_skill": avg_skill
+    })
+

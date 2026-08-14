@@ -418,6 +418,11 @@ export async function getStudentSkillGaps() {
   return (data?.results && data.results.length > 0) ? data.results : MOCK_STUDENT_SKILLS;
 }
 
+export async function getStudentTelemetry() {
+  const data = await fetchApi('/student/telemetry/');
+  return data?.results && data.results.length > 0 ? data.results : null;
+}
+
 export async function getSkillRoadmap() {
   const data = await fetchApi('/student/roadmap/');
   return (data?.results && data.results.length > 0) ? data.results : MOCK_CAREER_ROADMAP;

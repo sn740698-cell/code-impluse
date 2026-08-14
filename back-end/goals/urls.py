@@ -6,4 +6,5 @@ urlpatterns = [
     path("student/career/", views.student_career), path("student/skills/", views.student_skills),
     path("student/skill-gaps/", views.student_gaps), path("student/roadmap/", views.student_roadmap),
     path("student/projects/", views.student_projects), path("student/career-readiness/", views.student_readiness),
+    path("student/telemetry/", views.student_telemetry),
 ]
