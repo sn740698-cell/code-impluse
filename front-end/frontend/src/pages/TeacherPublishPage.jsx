@@ -21,7 +21,7 @@ export default function TeacherPublishPage() {
     category: 'Cybersecurity Department',
     starts_at: '2026-09-01T10:00',
     ends_at: '2026-09-01T13:00',
-    speaker: 'Dr. Marcus Vance',
+    speaker: 'Prof. Sarah Jenkins',
     organization: 'Department of Computer Science & Cybersecurity',
     skills: 'Networking, TCP/IP, Wireshark',
     interests: 'Cybersecurity, Network Architecture',

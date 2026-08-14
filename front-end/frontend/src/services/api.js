@@ -245,7 +245,7 @@ export const MOCK_OPPORTUNITIES_CATALOG = [
     title: "Networking Fundamentals & Protocol Analysis Workshop",
     type: "Workshop",
     organization: "Department of Computer Science & Cybersecurity",
-    speaker: "Dr. Marcus Vance (Senior Network Architect)",
+    speaker: "Prof. Sarah Jenkins (Faculty Advisor)",
     starts_at: "2026-08-22T10:00:00Z",
     ends_at: "2026-08-22T13:00:00Z",
     registration_deadline: "2026-08-20T23:59:59Z",
