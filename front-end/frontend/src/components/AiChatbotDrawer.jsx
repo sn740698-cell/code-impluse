@@ -18,7 +18,7 @@ export default function AiChatbotDrawer({ isOpen, onClose }) {
     {
       id: 1,
       sender: 'bot',
-      text: "Hello Alex! I am your AI Career Compass Advisor powered by Qwen 3:8B. How can I assist your career path today?",
+      text: "Hello Alex! I am your AI Career Compass Advisor powered by Qwen 3:8B & OpenRouter. Ask me anything about your career path, skill gaps, or schedule balance!",
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -27,10 +27,10 @@ export default function AiChatbotDrawer({ isOpen, onClose }) {
   const chatEndRef = useRef(null);
 
   const quickPrompts = [
-    { text: "Analyze my skill gap for AI Engineer role", icon: Target },
-    { text: "How can I improve my GPA in CS-312?", icon: Lightbulb },
-    { text: "Recommend internships matching my profile", icon: Briefcase },
-    { text: "Explain RAG & Vector Database architecture", icon: Terminal }
+    { text: "Analyze my skill gap for Cybersecurity Engineer", icon: Target },
+    { text: "How should I prepare for my DBMS exam?", icon: Lightbulb },
+    { text: "Recommend workshops matching my profile", icon: Briefcase },
+    { text: "Explain Network Protocol Analysis basics", icon: Terminal }
   ];
 
   useEffect(() => {
@@ -81,55 +81,67 @@ export default function AiChatbotDrawer({ isOpen, onClose }) {
     <div style={{
       position: 'fixed',
       inset: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.65)',
-      backdropFilter: 'blur(6px)',
-      zIndex: 999,
+      backgroundColor: 'rgba(0, 0, 0, 0.75)',
+      backdropFilter: 'blur(8px)',
+      zIndex: 9999,
       display: 'flex',
       justifyContent: 'flex-end',
       transition: 'all 0.3s ease'
     }}>
-      <div className="glass-card" style={{
-        width: '460px',
-        maxWidth: '90vw',
+      <div style={{
+        width: '480px',
+        maxWidth: '92vw',
         height: '100vh',
-        borderRadius: 'var(--radius-lg) 0 0 var(--radius-lg)',
+        background: 'var(--bg-surface)',
         display: 'flex',
         flexDirection: 'column',
-        boxShadow: '-10px 0 40px rgba(0,0,0,0.5)',
-        borderLeft: '1px solid var(--border-active)'
+        boxShadow: '-12px 0 50px rgba(0,0,0,0.6)',
+        borderLeft: '2px solid var(--color-purple)'
       }}>
         {/* Header */}
         <div style={{
           padding: '18px 24px',
-          borderBottom: '1px solid var(--border-light)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          background: 'linear-gradient(90deg, rgba(6, 182, 212, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%)'
+          background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #d946ef 100%)',
+          color: '#ffffff'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <div style={{
-              width: '38px',
-              height: '38px',
+              width: '40px',
+              height: '40px',
               borderRadius: '50%',
-              background: 'var(--gradient-primary)',
+              background: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: 'var(--neon-cyan-shadow)'
+              boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
             }}>
-              <Bot size={20} color="#ffffff" />
+              <Bot size={22} color="#8b5cf6" />
             </div>
             <div>
-              <h3 style={{ fontSize: '1rem', margin: 0, fontWeight: 700 }}>AI Career Compass</h3>
-              <p style={{ fontSize: '0.72rem', color: 'var(--accent-cyan)', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <Sparkles size={12} /> Ollama Qwen 3:8B Integration
+              <h3 style={{ fontSize: '1.05rem', margin: 0, fontWeight: 800, color: '#ffffff', letterSpacing: '0.02em' }}>
+                AI Career Compass Advisor
+              </h3>
+              <p style={{ fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.95)', margin: 0, display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 600 }}>
+                <Sparkles size={13} color="#fde047" /> Ollama Qwen 3:8B & OpenRouter Engine
               </p>
             </div>
           </div>
 
-          <button onClick={onClose} className="btn-ghost" style={{ padding: '6px', borderRadius: '50%' }}>
-            <X size={20} />
+          <button 
+            onClick={onClose} 
+            className="btn-ghost" 
+            style={{ 
+              padding: '8px', 
+              borderRadius: '50%',
+              background: 'rgba(255,255,255,0.15)',
+              color: '#ffffff'
+            }}
+            title="Close Assistant"
+          >
+            <X size={20} color="#ffffff" />
           </button>
         </div>
 
@@ -140,7 +152,8 @@ export default function AiChatbotDrawer({ isOpen, onClose }) {
           padding: '20px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '16px'
+          gap: '16px',
+          background: 'var(--bg-app)'
         }}>
           {messages.map((msg) => (
             <div
@@ -149,77 +162,97 @@ export default function AiChatbotDrawer({ isOpen, onClose }) {
                 display: 'flex',
                 gap: '10px',
                 alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
-                maxWidth: '85%'
+                maxWidth: '88%'
               }}
             >
               {msg.sender === 'bot' && (
                 <div style={{
-                  width: '28px',
-                  height: '28px',
+                  width: '32px',
+                  height: '32px',
                   borderRadius: '50%',
-                  background: 'var(--accent-purple)',
+                  background: 'var(--color-purple)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  flexShrink: 0
+                  flexShrink: 0,
+                  boxShadow: '0 2px 8px rgba(139, 92, 246, 0.3)'
                 }}>
-                  <Bot size={14} color="#ffffff" />
+                  <Bot size={16} color="#ffffff" />
                 </div>
               )}
 
               <div style={{
-                background: msg.sender === 'user' ? 'var(--gradient-primary)' : 'var(--bg-tertiary)',
+                background: msg.sender === 'user' 
+                  ? 'linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)' 
+                  : 'rgba(139, 92, 246, 0.12)',
                 color: msg.sender === 'user' ? '#ffffff' : 'var(--text-main)',
-                padding: '12px 16px',
-                borderRadius: msg.sender === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                fontSize: '0.85rem',
-                lineHeight: 1.5,
-                border: msg.sender === 'bot' ? '1px solid var(--border-light)' : 'none',
-                boxShadow: msg.sender === 'user' ? '0 4px 12px rgba(6,182,212,0.3)' : 'none'
+                padding: '14px 18px',
+                borderRadius: msg.sender === 'user' ? '20px 20px 4px 20px' : '20px 20px 20px 4px',
+                fontSize: '0.88rem',
+                lineHeight: 1.6,
+                border: msg.sender === 'bot' ? '1px solid rgba(139, 92, 246, 0.35)' : 'none',
+                boxShadow: msg.sender === 'user' ? '0 4px 14px rgba(59, 130, 246, 0.3)' : '0 2px 10px rgba(0,0,0,0.1)'
               }}>
-                <div style={{ whiteSpace: 'pre-line' }}>{msg.text}</div>
+                <div style={{ whiteSpace: 'pre-line', fontWeight: msg.sender === 'user' ? 600 : 400 }}>
+                  {msg.text}
+                </div>
                 <div style={{
-                  fontSize: '0.65rem',
-                  opacity: 0.7,
-                  marginTop: '6px',
-                  textAlign: 'right'
+                  fontSize: '0.68rem',
+                  opacity: 0.8,
+                  marginTop: '8px',
+                  textAlign: 'right',
+                  fontWeight: 600,
+                  color: msg.sender === 'user' ? 'rgba(255,255,255,0.85)' : 'var(--color-purple)'
                 }}>
-                  {msg.time} {msg.provider ? `• ${msg.provider}` : ''}
+                  {msg.time} {msg.provider ? `• Engine: ${msg.provider}` : ''}
                 </div>
               </div>
 
               {msg.sender === 'user' && (
                 <div style={{
-                  width: '28px',
-                  height: '28px',
+                  width: '32px',
+                  height: '32px',
                   borderRadius: '50%',
-                  background: 'var(--accent-cyan)',
+                  background: 'var(--color-brand-primary)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  flexShrink: 0
+                  flexShrink: 0,
+                  boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)'
                 }}>
-                  <User size={14} color="#ffffff" />
+                  <User size={16} color="#ffffff" />
                 </div>
               )}
             </div>
           ))}
 
           {isLoading && (
-            <div style={{ display: 'flex', gap: '10px', alignSelf: 'flex-start' }}>
+            <div style={{ display: 'flex', gap: '10px', alignSelf: 'flex-start', alignItems: 'center' }}>
               <div style={{
-                width: '28px',
-                height: '28px',
+                width: '32px',
+                height: '32px',
                 borderRadius: '50%',
-                background: 'var(--accent-purple)',
+                background: 'var(--color-purple)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <RefreshCw size={14} color="#ffffff" className="animate-pulse-glow" />
+                <RefreshCw size={16} color="#ffffff" className="animate-spin" />
               </div>
-              <div className="glass-card" style={{ padding: '10px 14px', fontSize: '0.8rem', color: 'var(--accent-cyan)' }}>
-                Qwen AI is formulating career response...
+              <div style={{
+                padding: '12px 16px',
+                borderRadius: '16px',
+                background: 'rgba(139, 92, 246, 0.15)',
+                border: '1px solid rgba(139, 92, 246, 0.35)',
+                fontSize: '0.84rem',
+                color: 'var(--text-main)',
+                fontWeight: 600,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <Sparkles size={16} color="var(--color-purple)" />
+                <span>AI Assistant is analyzing career profile & generating response...</span>
               </div>
             </div>
           )}
@@ -227,73 +260,90 @@ export default function AiChatbotDrawer({ isOpen, onClose }) {
           <div ref={chatEndRef} />
         </div>
 
-        {/* Quick Prompts */}
-        <div style={{ padding: '0 16px 12px 16px', display: 'flex', gap: '8px', overflowX: 'auto' }}>
+        {/* Quick Prompts Bar */}
+        <div style={{ 
+          padding: '12px 18px', 
+          display: 'flex', 
+          gap: '8px', 
+          overflowX: 'auto',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          background: 'var(--bg-surface)',
+          borderTop: '1px solid var(--border-clean)'
+        }}>
           {quickPrompts.map((qp, idx) => {
             const Icon = qp.icon;
             return (
               <button
                 key={idx}
                 onClick={() => handleSend(qp.text)}
-                className="btn-ghost"
                 style={{
-                  fontSize: '0.72rem',
-                  padding: '6px 10px',
-                  borderRadius: 'var(--radius-full)',
-                  border: '1px solid var(--border-light)',
-                  background: 'rgba(255,255,255,0.03)',
+                  fontSize: '0.76rem',
+                  padding: '7px 12px',
+                  borderRadius: 'var(--radius-pill)',
+                  border: '1px solid rgba(139, 92, 246, 0.3)',
+                  background: 'rgba(139, 92, 246, 0.12)',
+                  color: 'var(--text-main)',
                   whiteSpace: 'nowrap',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '4px'
+                  gap: '6px',
+                  cursor: 'pointer',
+                  fontWeight: 600,
+                  transition: 'all 0.2s ease'
                 }}
               >
-                <Icon size={12} color="var(--accent-cyan)" />
+                <Icon size={13} color="var(--color-purple)" />
                 <span>{qp.text}</span>
               </button>
             );
           })}
         </div>
 
-        {/* Input Bar */}
+        {/* Input Form Bar */}
         <div style={{
           padding: '16px 20px',
-          borderTop: '1px solid var(--border-light)',
-          background: 'var(--bg-secondary)'
+          borderTop: '1px solid var(--border-clean)',
+          background: 'var(--bg-surface)'
         }}>
           <form
             onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-            style={{ display: 'flex', gap: '10px' }}
+            style={{ display: 'flex', gap: '10px', alignItems: 'center' }}
           >
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Ask Qwen AI for career guidance or code advice..."
+              placeholder="Ask AI Advisor for career path, skill gap, or course advice..."
               style={{
                 flex: 1,
-                padding: '12px 16px',
-                borderRadius: 'var(--radius-full)',
-                background: 'var(--bg-tertiary)',
-                border: '1px solid var(--border-light)',
+                padding: '13px 18px',
+                borderRadius: 'var(--radius-pill)',
+                background: 'var(--bg-input)',
+                border: '1.5px solid rgba(139, 92, 246, 0.4)',
                 color: 'var(--text-main)',
-                fontSize: '0.85rem',
-                outline: 'none'
+                fontSize: '0.88rem',
+                outline: 'none',
+                fontWeight: 500
               }}
             />
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !inputValue.trim()}
               className="btn-primary"
               style={{
                 borderRadius: '50%',
-                width: '42px',
-                height: '42px',
+                width: '44px',
+                height: '44px',
                 padding: 0,
-                flexShrink: 0
+                flexShrink: 0,
+                background: inputValue.trim() ? 'linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%)' : 'var(--bg-input)',
+                cursor: inputValue.trim() ? 'pointer' : 'default',
+                opacity: inputValue.trim() ? 1 : 0.6
               }}
+              title="Send Message"
             >
-              <Send size={18} />
+              <Send size={18} color="#ffffff" />
             </button>
           </form>
         </div>
