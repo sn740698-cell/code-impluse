@@ -4,6 +4,9 @@ import Sidebar from './components/Sidebar';
 import AiChatbotDrawer from './components/AiChatbotDrawer';
 import GradientWaves from './components/GradientWaves';
 
+// Authentication Pages
+import LoginPage from './pages/LoginPage';
+
 // Part 1: Career Compass Pages
 import CareerOverview from './pages/CareerOverview';
 import SkillAnalysis from './pages/SkillAnalysis';
@@ -25,8 +28,13 @@ import TeacherPublishPage from './pages/TeacherPublishPage';
 import TeacherAnalyticsPage from './pages/TeacherAnalyticsPage';
 
 export default function App() {
+  const [currentUser, setCurrentUser] = useState({
+    name: 'Alex Rivera',
+    email: 'alex.rivera@university.edu',
+    role: 'student' // 'student' | 'teacher'
+  });
+
   const [activeTab, setActiveTab] = useState('compass_overview');
-  const [currentRole, setRole] = useState('student'); // 'student' | 'teacher'
   const [theme, setTheme] = useState('dark');
   const [isAiChatOpen, setIsAiChatOpen] = useState(false);
 
@@ -36,6 +44,19 @@ export default function App() {
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
+  const handleLogin = (user) => {
+    setCurrentUser(user);
+    if (user.role === 'teacher') {
+      setActiveTab('teacher_publish');
+    } else {
+      setActiveTab('compass_overview');
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
   };
 
   const renderActivePage = () => {
@@ -58,7 +79,7 @@ export default function App() {
       case 'opp_recommended':
         return <RecommendedOpportunities />;
       case 'opp_catalog':
-        return <OpportunitiesHub currentRole={currentRole} />;
+        return <OpportunitiesHub currentRole={currentUser?.role} />;
       case 'opp_saved_registered':
       case 'opp_feedback':
         return <MyOpportunitiesJourney />;
@@ -87,12 +108,12 @@ export default function App() {
         inset: 0,
         zIndex: 0,
         pointerEvents: 'none',
-        opacity: theme === 'dark' ? 0.35 : 0.2
+        opacity: theme === 'dark' ? 0.28 : 0.15
       }}>
         <GradientWaves
           horizonColor="#2563eb"
-          waveColor="#9333ea"
-          crestColor="#fde047"
+          waveColor="#8b5cf6"
+          crestColor="#f59e0b"
           speed={0.3}
           amplitude={2.0}
           waveScale={0.5}
@@ -104,7 +125,7 @@ export default function App() {
           height={5.0}
           fogDepth={12}
           detail="medium"
-          brightness={1.1}
+          brightness={1.0}
           opacity={1.0}
           mouseInteraction={true}
           parallaxStrength={0.4}
@@ -113,48 +134,56 @@ export default function App() {
         />
       </div>
 
-      {/* Top sticky navbar */}
-      <div style={{ position: 'relative', zIndex: 10 }}>
-        <Navbar
-          currentRole={currentRole}
-          setRole={setRole}
-          theme={theme}
-          toggleTheme={toggleTheme}
-          onOpenAiChat={() => setIsAiChatOpen(true)}
-        />
-      </div>
+      {/* Render Login Page if User is not logged in */}
+      {!currentUser ? (
+        <LoginPage onLogin={handleLogin} />
+      ) : (
+        <>
+          {/* Top sticky navbar */}
+          <div style={{ position: 'relative', zIndex: 10 }}>
+            <Navbar
+              currentUser={currentUser}
+              onLogout={handleLogout}
+              theme={theme}
+              toggleTheme={toggleTheme}
+              onOpenAiChat={() => setIsAiChatOpen(true)}
+            />
+          </div>
 
-      {/* Main Body */}
-      <div style={{
-        display: 'flex',
-        gap: '24px',
-        maxWidth: '1440px',
-        width: '100%',
-        margin: '0 auto',
-        padding: '0 24px 40px 24px',
-        flex: 1,
-        position: 'relative',
-        zIndex: 10
-      }}>
-        <Sidebar
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          currentRole={currentRole}
-          onOpenAiChat={() => setIsAiChatOpen(true)}
-        />
+          {/* Main Workspace Body */}
+          <div style={{
+            display: 'flex',
+            gap: '24px',
+            maxWidth: '1440px',
+            width: '100%',
+            margin: '0 auto',
+            padding: '0 24px 40px 24px',
+            flex: 1,
+            position: 'relative',
+            zIndex: 10
+          }}>
+            <Sidebar
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              currentUser={currentUser}
+              onOpenAiChat={() => setIsAiChatOpen(true)}
+            />
 
-        <main style={{ flex: 1, minWidth: 0 }}>
-          {renderActivePage()}
-        </main>
-      </div>
+            <main style={{ flex: 1, minWidth: 0 }}>
+              {renderActivePage()}
+            </main>
+          </div>
 
-      {/* Qwen3 AI Assistant Drawer */}
-      <div style={{ position: 'relative', zIndex: 100 }}>
-        <AiChatbotDrawer
-          isOpen={isAiChatOpen}
-          onClose={() => setIsAiChatOpen(false)}
-        />
-      </div>
+          {/* Qwen3 AI Assistant Drawer */}
+          <div style={{ position: 'relative', zIndex: 100 }}>
+            <AiChatbotDrawer
+              isOpen={isAiChatOpen}
+              onClose={() => setIsAiChatOpen(false)}
+            />
+          </div>
+        </>
+      )}
+
     </div>
   );
 }
