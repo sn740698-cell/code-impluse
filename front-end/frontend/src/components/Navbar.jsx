@@ -163,22 +163,24 @@ export default function Navbar({ currentUser, onLogout, theme, toggleTheme, onOp
         {/* User Info & Logout Button */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', paddingLeft: '8px', borderLeft: '1px solid var(--border-clean)' }}>
           <img
-            src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"
+            src={currentUser.role === 'teacher' 
+              ? "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80" 
+              : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"}
             alt="User Avatar"
             style={{
               width: '34px',
               height: '34px',
               borderRadius: '50%',
               objectFit: 'cover',
-              border: '2px solid var(--color-brand-primary)'
+              border: `2px solid ${currentUser.role === 'teacher' ? 'var(--color-purple)' : 'var(--color-brand-primary)'}`
             }}
           />
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <span style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-main)', lineHeight: 1.1 }}>
-              {currentUser.name}
+              {currentUser.name || (currentUser.role === 'teacher' ? 'Prof. Sarah Jenkins' : 'Alex Rivera')}
             </span>
-            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-              {currentUser.role === 'student' ? 'Student' : 'Faculty'}
+            <span style={{ fontSize: '0.7rem', color: currentUser.role === 'teacher' ? 'var(--color-purple)' : 'var(--text-muted)', fontWeight: 600 }}>
+              {currentUser.role === 'teacher' ? 'Faculty Advisor' : 'Student'}
             </span>
           </div>
 

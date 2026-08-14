@@ -65,16 +65,33 @@ export default function App() {
   };
 
   const handleLogin = (user) => {
-    setCurrentUser(user);
     if (user.role === 'teacher') {
+      const teacherObj = {
+        name: user.name || 'Prof. Sarah Jenkins',
+        email: user.email || 'prof.sarah@university.edu',
+        role: 'teacher'
+      };
+      setCurrentUser(teacherObj);
+      setStudentProfile(null);
       setActiveTab('teacher_dashboard');
     } else {
+      const studentObj = {
+        name: user.name || 'Alex Rivera',
+        email: user.email || 'alex.rivera@university.edu',
+        role: 'student',
+        target_career: user.target_career || 'Cybersecurity Engineer',
+        career_readiness: user.career_readiness || 58,
+        skills: user.skills || []
+      };
+      setCurrentUser(studentObj);
+      setStudentProfile(studentObj);
       setActiveTab('compass_overview');
     }
   };
 
   const handleOnboardingComplete = (profileData) => {
     setStudentProfile(profileData);
+    setCurrentUser(prev => ({ ...(prev || {}), ...profileData }));
     setHasCompletedOnboarding(true);
     setActiveTab('compass_overview');
   };
@@ -86,6 +103,7 @@ export default function App() {
       console.warn('Logout error:', err);
     }
     setCurrentUser(null);
+    setStudentProfile(null);
     setHasCompletedOnboarding(false);
   };
 

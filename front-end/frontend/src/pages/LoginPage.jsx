@@ -30,15 +30,14 @@ export default function LoginPage({ onLogin }) {
   const [newSkill, setNewSkill] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleQuickFillStudent = () => {
+  const handleSwitchToStudent = () => {
     setRole('student');
     setName('Alex Rivera');
     setEmail('alex.rivera@university.edu');
     setPassword('student123');
-    setTargetCareer('Cybersecurity Engineer');
   };
 
-  const handleQuickFillTeacher = () => {
+  const handleSwitchToTeacher = () => {
     setRole('teacher');
     setName('Prof. Sarah Jenkins');
     setEmail('prof.sarah@university.edu');
@@ -62,24 +61,28 @@ export default function LoginPage({ onLogin }) {
     e.preventDefault();
     setIsLoading(true);
 
+    const isTeacher = role === 'teacher';
+    const finalName = name.trim() || (isTeacher ? 'Prof. Sarah Jenkins' : 'Alex Rivera');
+    const finalEmail = email.trim() || (isTeacher ? 'prof.sarah@university.edu' : 'alex.rivera@university.edu');
+
     const avgProf = customSkills.length > 0
       ? Math.round(customSkills.reduce((acc, s) => acc + s.proficiency, 0) / customSkills.length)
       : 58;
 
-    const studentProfilePayload = {
-      name: name || (role === 'student' ? 'Alex Rivera' : 'Prof. Sarah Jenkins'),
-      email,
-      role,
-      target_career: targetCareer,
-      career_readiness: avgProf,
-      skills: customSkills
+    const userPayload = {
+      name: finalName,
+      email: finalEmail,
+      role: role,
+      target_career: isTeacher ? undefined : targetCareer,
+      career_readiness: isTeacher ? undefined : avgProf,
+      skills: isTeacher ? undefined : customSkills
     };
 
     try {
-      const user = await loginApi({ email, password, role });
-      onLogin({ ...(user || {}), ...studentProfilePayload });
+      const apiUser = await loginApi({ email: finalEmail, password, role });
+      onLogin({ ...(apiUser || {}), ...userPayload });
     } catch {
-      onLogin(studentProfilePayload);
+      onLogin(userPayload);
     } finally {
       setIsLoading(false);
     }
@@ -121,7 +124,7 @@ export default function LoginPage({ onLogin }) {
             AI Career Compass
           </h2>
           <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', margin: 0 }}>
-            Sign in with your customized carrier skills & target career goal
+            Sign in to access Student Workspace or Faculty Advisory Portal
           </p>
         </div>
 
@@ -136,7 +139,7 @@ export default function LoginPage({ onLogin }) {
         }}>
           <button
             type="button"
-            onClick={() => { setRole('student'); setName('Alex Rivera'); }}
+            onClick={handleSwitchToStudent}
             style={{
               flex: 1,
               padding: '8px',
@@ -158,7 +161,7 @@ export default function LoginPage({ onLogin }) {
           </button>
           <button
             type="button"
-            onClick={() => { setRole('teacher'); setName('Prof. Sarah Jenkins'); }}
+            onClick={handleSwitchToTeacher}
             style={{
               flex: 1,
               padding: '8px',
@@ -180,23 +183,23 @@ export default function LoginPage({ onLogin }) {
           </button>
         </div>
 
-        {/* Quick Fill Pills */}
+        {/* Quick Demo Fill Buttons */}
         <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
           <button
             type="button"
-            onClick={handleQuickFillStudent}
+            onClick={handleSwitchToStudent}
             className="btn-ghost"
             style={{ flex: 1, fontSize: '0.74rem', padding: '6px 10px', background: 'var(--bg-input)' }}
           >
-            ⚡ Student Demo
+            ⚡ Student Demo (Alex Rivera)
           </button>
           <button
             type="button"
-            onClick={handleQuickFillTeacher}
+            onClick={handleSwitchToTeacher}
             className="btn-ghost"
             style={{ flex: 1, fontSize: '0.74rem', padding: '6px 10px', background: 'var(--bg-input)' }}
           >
-            ⚡ Faculty Demo
+            ⚡ Faculty Demo (Prof. Sarah)
           </button>
         </div>
 
@@ -211,7 +214,7 @@ export default function LoginPage({ onLogin }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="clean-input"
-              placeholder="e.g. Alex Rivera"
+              placeholder={role === 'student' ? 'e.g. Alex Rivera' : 'e.g. Prof. Sarah Jenkins'}
             />
           </div>
 
@@ -225,7 +228,7 @@ export default function LoginPage({ onLogin }) {
                 onChange={(e) => setEmail(e.target.value)}
                 className="clean-input"
                 style={{ paddingLeft: '38px' }}
-                placeholder="name@university.edu"
+                placeholder={role === 'student' ? 'alex.rivera@university.edu' : 'prof.sarah@university.edu'}
               />
               <Mail size={16} color="var(--text-subtle)" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
             </div>
@@ -334,7 +337,13 @@ export default function LoginPage({ onLogin }) {
             type="submit"
             disabled={isLoading}
             className="btn-primary"
-            style={{ width: '100%', padding: '12px', fontSize: '0.9rem', marginTop: '6px' }}
+            style={{
+              width: '100%',
+              padding: '12px',
+              fontSize: '0.9rem',
+              marginTop: '6px',
+              background: role === 'teacher' ? 'var(--color-purple)' : 'var(--color-brand-primary)'
+            }}
           >
             <span>{isLoading ? 'Authenticating...' : `Sign In to ${role === 'student' ? 'Student Workspace' : 'Faculty Advisor Portal'}`}</span>
             <ArrowRight size={16} />
