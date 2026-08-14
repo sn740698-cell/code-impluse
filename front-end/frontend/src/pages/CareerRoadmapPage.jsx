@@ -26,12 +26,16 @@ export default function CareerRoadmapPage() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
       
-      {/* Header */}
-      <div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Part 1.5 & 1.6 — Personalized Career Roadmap & Milestones</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '2px 0 0 0' }}>
-          Sequential learning path from Foundations to Core Security and Specialization
-        </p>
+      {/* Visual Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Map size={24} color="var(--color-amber)" /> Career Roadmap & Interactive Milestones
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', margin: '4px 0 0 0' }}>
+            Sequential learning path from Foundations to Core Security and Specialization
+          </p>
+        </div>
       </div>
 
       {/* Roadmap Stages */}
@@ -42,31 +46,41 @@ export default function CareerRoadmapPage() {
           const percent = Math.round((completedCount / totalCount) * 100);
 
           return (
-            <div key={stageIdx} className="soft-card" style={{
+            <div key={stageIdx} className="clean-card" style={{
               padding: '24px',
-              borderLeft: stage.is_current_stage ? '5px solid var(--primary-blue)' : '1px solid var(--border-subtle)',
-              background: stage.is_current_stage ? 'rgba(37, 99, 235, 0.08)' : 'var(--bg-card)'
+              borderLeft: stage.is_current_stage ? '5px solid var(--color-brand-primary)' : '1px solid var(--border-clean)',
+              background: stage.is_current_stage ? 'rgba(59, 130, 246, 0.08)' : 'var(--bg-card)'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0 }}>{stage.stage_name}</h3>
                     {stage.is_current_stage && (
-                      <span className="badge badge-blue">Current Active Stage</span>
+                      <span className="badge badge-blue">Active Stage</span>
                     )}
                   </div>
                   <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                    Target Proficiency: {stage.required_proficiency}% • Progress: {percent}%
+                    Target Proficiency: {stage.required_proficiency}% • Stage Progress: {percent}%
                   </div>
                 </div>
 
-                {/* Progress Circle */}
                 <span className="badge badge-purple" style={{ fontSize: '0.8rem' }}>
-                  {completedCount} / {totalCount} Milestones Done
+                  {completedCount} / {totalCount} Done
                 </span>
               </div>
 
-              {/* Skills Covered in Stage */}
+              {/* Progress Bar */}
+              <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: 'var(--radius-pill)', marginBottom: '16px', overflow: 'hidden' }}>
+                <div style={{
+                  width: `${percent}%`,
+                  height: '100%',
+                  background: 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
+                  borderRadius: 'var(--radius-pill)',
+                  transition: 'width 0.4s ease'
+                }} />
+              </div>
+
+              {/* Skills Covered */}
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 {stage.skills.map((sk, sIdx) => (
                   <span key={sIdx} className="badge badge-purple" style={{ fontSize: '0.72rem' }}>
@@ -75,15 +89,13 @@ export default function CareerRoadmapPage() {
                 ))}
               </div>
 
-              {/* Learning Milestones (Part 1 Item 6) */}
+              {/* Learning Milestones */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '18px' }}>
-                <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '4px' }}>
-                  STAGE MILESTONES:
-                </div>
                 {stage.milestones.map(m => (
                   <div
                     key={m.id}
                     onClick={() => toggleMilestone(stageIdx, m.id)}
+                    className="clean-card clean-card-interactive"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -91,12 +103,11 @@ export default function CareerRoadmapPage() {
                       padding: '10px 14px',
                       borderRadius: 'var(--radius-sm)',
                       background: 'var(--bg-input)',
-                      cursor: 'pointer',
-                      border: '1px solid var(--border-subtle)'
+                      border: '1px solid var(--border-clean)'
                     }}
                   >
                     {m.completed ? (
-                      <CheckCircle2 size={18} color="var(--accent-emerald)" />
+                      <CheckCircle2 size={18} color="var(--color-emerald)" />
                     ) : (
                       <Circle size={18} color="var(--text-subtle)" />
                     )}
@@ -114,19 +125,19 @@ export default function CareerRoadmapPage() {
               {/* Suggested Project & Resources */}
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
                 gap: '12px',
-                paddingTop: '12px',
-                borderTop: '1px dashed var(--border-subtle)',
+                paddingTop: '14px',
+                borderTop: '1px dashed var(--border-clean)',
                 fontSize: '0.82rem'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fde047' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-amber)' }}>
                   <Code size={16} />
                   <span><strong>Suggested Project:</strong> {stage.projects}</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#c084fc' }}>
                   <BookOpen size={16} />
-                  <span><strong>Resources:</strong> {stage.resources}</span>
+                  <span><strong>Resource:</strong> {stage.resources}</span>
                 </div>
               </div>
 

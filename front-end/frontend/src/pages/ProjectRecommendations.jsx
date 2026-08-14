@@ -13,17 +13,21 @@ export default function ProjectRecommendations() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
       
       {/* Header */}
-      <div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Part 1.7 — Project Recommendations</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '2px 0 0 0' }}>
-          Hands-on practical projects matched to your current demonstrated skill level
-        </p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Code size={24} color="var(--color-brand-primary)" /> Hands-On Project Recommendations
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', margin: '4px 0 0 0' }}>
+            Practical projects matched to your current demonstrated skill level
+          </p>
+        </div>
       </div>
 
       {/* Project Cards Grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
         {MOCK_PROJECT_RECOMMENDATIONS.map(project => (
-          <div key={project.id} className="soft-card soft-card-interactive" style={{ padding: '22px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div key={project.id} className="clean-card clean-card-interactive" style={{ padding: '22px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                 <span className="badge badge-yellow">{project.difficulty}</span>
@@ -45,7 +49,7 @@ export default function ProjectRecommendations() {
               </div>
 
               <div style={{ marginBottom: '16px' }}>
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#fde047', marginBottom: '4px' }}>DEVELOPS SKILLS:</div>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-amber)', marginBottom: '4px' }}>DEVELOPS SKILLS:</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                   {project.develops_skills.map((s, i) => (
                     <span key={i} className="badge badge-purple" style={{ fontSize: '0.68rem' }}>{s}</span>

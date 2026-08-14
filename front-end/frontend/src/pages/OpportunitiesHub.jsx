@@ -68,13 +68,15 @@ export default function OpportunitiesHub({ currentRole }) {
   });
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
       
-      {/* Header with Publish Button for Teachers */}
+      {/* Visual Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Career Opportunities & Internships</h2>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.88rem', margin: 0 }}>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Briefcase size={24} color="var(--color-brand-primary)" /> Career Opportunities Catalog
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', margin: '4px 0 0 0' }}>
             Curated internships, hackathons, and research positions indexed for your skill profile
           </p>
         </div>
@@ -83,22 +85,21 @@ export default function OpportunitiesHub({ currentRole }) {
           <button 
             onClick={() => setShowCreateModal(true)} 
             className="btn-primary" 
-            style={{ background: 'var(--gradient-amber-rose)' }}
           >
             <Plus size={18} /> Post Opportunity
           </button>
         )}
       </div>
 
-      {/* Filter & Search Bar */}
-      <div className="glass-card" style={{ padding: '16px 20px', display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+      {/* Search & Filter Bar */}
+      <div className="clean-card" style={{ padding: '16px 20px', display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{
           display: 'flex',
           alignItems: 'center',
           gap: '10px',
-          background: 'var(--bg-tertiary)',
-          border: '1px solid var(--border-light)',
-          borderRadius: 'var(--radius-full)',
+          background: 'var(--bg-input)',
+          border: '1px solid var(--border-clean)',
+          borderRadius: 'var(--radius-pill)',
           padding: '8px 16px',
           flex: 1,
           minWidth: '260px'
@@ -125,13 +126,13 @@ export default function OpportunitiesHub({ currentRole }) {
             <button
               key={type}
               onClick={() => setFilterType(type)}
-              className="btn-ghost"
+              className="tab-pill"
               style={{
                 fontSize: '0.82rem',
                 padding: '6px 14px',
-                borderRadius: 'var(--radius-full)',
-                background: filterType === type ? 'var(--gradient-primary)' : 'rgba(255,255,255,0.04)',
-                color: filterType === type ? '#ffffff' : 'var(--text-secondary)',
+                borderRadius: 'var(--radius-pill)',
+                background: filterType === type ? 'var(--color-brand-primary)' : 'var(--bg-input)',
+                color: filterType === type ? '#ffffff' : 'var(--text-muted)',
                 fontWeight: filterType === type ? 700 : 400
               }}
             >
@@ -144,31 +145,31 @@ export default function OpportunitiesHub({ currentRole }) {
       {/* Opportunity Cards List */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
         {filteredOpps.map(opp => (
-          <div key={opp.id} className="glass-card glass-card-interactive" style={{ padding: '22px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+          <div key={opp.id} className="clean-card clean-card-interactive" style={{ padding: '22px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                <span className="badge badge-cyan">{opp.type}</span>
-                <span className="badge badge-emerald" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <span className="badge badge-blue">{opp.type}</span>
+                <span className="badge badge-purple" style={{ gap: '4px' }}>
                   <Sparkles size={12} /> {opp.match_score}% Match
                 </span>
               </div>
 
               <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0 0 4px 0' }}>{opp.title}</h3>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--accent-purple)', fontWeight: 600, marginBottom: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--color-purple)', fontWeight: 600, marginBottom: '12px' }}>
                 <Building size={14} /> {opp.organization}
               </div>
 
-              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: 1.5 }}>
+              <p style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginBottom: '16px', lineHeight: 1.5 }}>
                 {opp.description}
               </p>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.78rem', color: 'var(--text-subtle)', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <MapPin size={13} color="var(--accent-cyan)" /> {opp.location}
+                  <MapPin size={13} color="var(--color-brand-primary)" /> {opp.location}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Calendar size={13} color="var(--accent-amber)" /> Registration Deadline: {new Date(opp.registration_deadline).toLocaleDateString()}
+                  <Calendar size={13} color="var(--color-amber)" /> Deadline: {new Date(opp.registration_deadline).toLocaleDateString()}
                 </div>
               </div>
             </div>
@@ -186,7 +187,7 @@ export default function OpportunitiesHub({ currentRole }) {
                 <button 
                   onClick={() => toggleRegister(opp.id)}
                   className="btn-primary" 
-                  style={{ flex: 1, padding: '10px 14px', fontSize: '0.84rem', background: opp.registered ? 'var(--gradient-emerald-teal)' : 'var(--gradient-primary)' }}
+                  style={{ flex: 1, padding: '10px 14px', fontSize: '0.84rem', background: opp.registered ? 'var(--color-emerald)' : undefined }}
                 >
                   {opp.registered ? <><Check size={16} /> Registered</> : 'Apply Now'}
                 </button>
@@ -194,115 +195,15 @@ export default function OpportunitiesHub({ currentRole }) {
                 <button 
                   onClick={() => toggleSave(opp.id)}
                   className="btn-secondary" 
-                  style={{ padding: '10px 14px', color: opp.saved ? 'var(--accent-amber)' : 'var(--text-main)' }}
+                  style={{ padding: '10px 14px', color: opp.saved ? 'var(--color-amber)' : undefined }}
                 >
-                  <Bookmark size={18} fill={opp.saved ? 'var(--accent-amber)' : 'none'} />
+                  <Bookmark size={18} fill={opp.saved ? 'var(--color-amber)' : 'none'} />
                 </button>
-
-                {opp.registration_link && (
-                  <a
-                    href={opp.registration_link}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="btn-secondary"
-                    style={{ padding: '10px 12px' }}
-                    title="External Link"
-                  >
-                    <ExternalLink size={16} />
-                  </a>
-                )}
               </div>
             </div>
           </div>
         ))}
       </div>
-
-      {/* Modal for Faculty to Publish Opportunity */}
-      {showCreateModal && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(0,0,0,0.7)',
-          backdropFilter: 'blur(4px)',
-          zIndex: 999,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <div className="glass-card" style={{ width: '500px', maxWidth: '90vw', padding: '28px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 style={{ fontSize: '1.2rem', margin: 0, fontWeight: 700 }}>Post New Career Opportunity</h3>
-              <button onClick={() => setShowCreateModal(false)} className="btn-ghost" style={{ padding: '6px' }}><X size={20} /></button>
-            </div>
-
-            <form onSubmit={handleCreateOpp} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>Title</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Frontend Developer Intern"
-                  value={newOpp.title}
-                  onChange={(e) => setNewOpp({ ...newOpp, title: e.target.value })}
-                  style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-tertiary)', border: '1px solid var(--border-light)', color: '#fff' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>Organization</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. University Tech Lab"
-                  value={newOpp.organization}
-                  onChange={(e) => setNewOpp({ ...newOpp, organization: e.target.value })}
-                  style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-tertiary)', border: '1px solid var(--border-light)', color: '#fff' }}
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>Type</label>
-                  <select
-                    value={newOpp.type}
-                    onChange={(e) => setNewOpp({ ...newOpp, type: e.target.value })}
-                    style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-tertiary)', border: '1px solid var(--border-light)', color: '#fff' }}
-                  >
-                    <option value="Internship">Internship</option>
-                    <option value="Hackathon">Hackathon</option>
-                    <option value="Research">Research</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>Location</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Remote / Campus"
-                    value={newOpp.location}
-                    onChange={(e) => setNewOpp({ ...newOpp, location: e.target.value })}
-                    style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-tertiary)', border: '1px solid var(--border-light)', color: '#fff' }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '4px' }}>Description</label>
-                <textarea
-                  rows={3}
-                  placeholder="Describe requirements and eligibility..."
-                  value={newOpp.description}
-                  onChange={(e) => setNewOpp({ ...newOpp, description: e.target.value })}
-                  style={{ width: '100%', padding: '10px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-tertiary)', border: '1px solid var(--border-light)', color: '#fff' }}
-                />
-              </div>
-
-              <button type="submit" className="btn-primary" style={{ marginTop: '10px' }}>
-                Publish Opportunity
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
 
     </div>
   );

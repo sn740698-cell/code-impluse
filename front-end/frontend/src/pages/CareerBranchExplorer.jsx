@@ -16,18 +16,22 @@ export default function CareerBranchExplorer() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
       
-      {/* Header */}
-      <div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Part 1.8 & 1.9 — Career Branch Explorer & Fields to Watch</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '2px 0 0 0' }}>
-          Explore specialization tracks within Cybersecurity & emerging industry trends
-        </p>
+      {/* Visual Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <GitBranch size={24} color="var(--color-purple)" /> Career Branch Explorer & Emerging Trends
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', margin: '4px 0 0 0' }}>
+            Explore specialization tracks within Cybersecurity & emerging industry trends
+          </p>
+        </div>
       </div>
 
-      {/* Item 8: Career Branch Explorer */}
-      <div className="soft-card" style={{ padding: '24px' }}>
-        <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <GitBranch size={18} color="#60a5fa" /> Cybersecurity Domain Branches
+      {/* Career Branch Explorer */}
+      <div className="clean-card" style={{ padding: '24px' }}>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <GitBranch size={18} color="var(--color-brand-primary)" /> Cybersecurity Domain Branches
         </h3>
 
         {/* Branch Tabs */}
@@ -38,12 +42,12 @@ export default function CareerBranchExplorer() {
               <button
                 key={idx}
                 onClick={() => setSelectedBranch(branch)}
-                className="btn-ghost"
+                className="tab-pill"
                 style={{
                   fontSize: '0.82rem',
                   padding: '8px 16px',
                   borderRadius: 'var(--radius-pill)',
-                  background: isSel ? 'linear-gradient(135deg, var(--primary-blue), var(--secondary-purple))' : 'var(--bg-input)',
+                  background: isSel ? 'var(--color-brand-primary)' : 'var(--bg-input)',
                   color: isSel ? '#ffffff' : 'var(--text-muted)',
                   fontWeight: isSel ? 700 : 500,
                   whiteSpace: 'nowrap'
@@ -61,17 +65,17 @@ export default function CareerBranchExplorer() {
           padding: '20px',
           borderRadius: 'var(--radius-sm)',
           display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
           gap: '20px'
         }}>
           <div>
             <span className="badge badge-purple" style={{ marginBottom: '8px' }}>Specialization Track</span>
             <h4 style={{ fontSize: '1.2rem', fontWeight: 800, margin: '0 0 6px 0' }}>{selectedBranch.name}</h4>
             <div style={{ fontSize: '0.88rem', color: 'var(--text-muted)', marginBottom: '14px' }}>
-              Current Readiness for this path: <strong style={{ color: '#60a5fa' }}>{selectedBranch.readiness}%</strong>
+              Current Readiness: <strong style={{ color: 'var(--color-brand-primary)' }}>{selectedBranch.readiness}%</strong>
             </div>
 
-            <div style={{ fontSize: '0.82rem', color: 'var(--accent-rose)', background: 'rgba(244, 63, 94, 0.1)', padding: '10px', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.82rem', color: 'var(--color-rose)', background: 'rgba(244, 63, 94, 0.1)', padding: '10px', borderRadius: 'var(--radius-sm)', border: '1px solid rgba(244, 63, 94, 0.25)' }}>
               <strong>Primary Skill Gap:</strong> {selectedBranch.gap}
             </div>
           </div>
@@ -87,16 +91,16 @@ export default function CareerBranchExplorer() {
         </div>
       </div>
 
-      {/* Item 9: Fields to Watch */}
-      <div className="soft-card" style={{ padding: '24px' }}>
-        <h3 style={{ fontSize: '1.15rem', fontWeight: 800, margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Eye size={18} color="#fde047" /> Emerging Fields to Watch
+      {/* Fields to Watch */}
+      <div className="clean-card" style={{ padding: '24px' }}>
+        <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Eye size={18} color="var(--color-amber)" /> Emerging Fields to Watch
         </h3>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
           {goal.fields_to_watch.map((field, idx) => (
-            <div key={idx} className="soft-card" style={{ padding: '18px', background: 'var(--bg-input)' }}>
-              <div className="badge badge-yellow" style={{ marginBottom: '8px' }}>Industry Trend</div>
+            <div key={idx} className="clean-card" style={{ padding: '18px', background: 'var(--bg-input)' }}>
+              <span className="badge badge-yellow" style={{ marginBottom: '8px' }}>Industry Trend</span>
               <h4 style={{ fontSize: '1rem', fontWeight: 700, margin: '0 0 6px 0' }}>{field.name}</h4>
               <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>
                 {field.why}
