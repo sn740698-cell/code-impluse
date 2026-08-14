@@ -109,33 +109,33 @@ export default function App() {
     switch (activeTab) {
       // Part 1: Career Compass
       case 'compass_overview':
-        return <CareerOverview studentProfile={studentProfile} onNavigate={setActiveTab} onOpenAiChat={() => setIsAiChatOpen(true)} />;
+        return <CareerOverview studentProfile={studentProfile || currentUser} onNavigate={setActiveTab} onOpenAiChat={() => setIsAiChatOpen(true)} />;
       case 'compass_skills':
-        return <SkillAnalysis />;
+        return <SkillAnalysis studentProfile={studentProfile || currentUser} />;
       case 'compass_gaps':
-        return <GoalSkillGap onOpenAiChat={() => setIsAiChatOpen(true)} />;
+        return <GoalSkillGap studentProfile={studentProfile || currentUser} onOpenAiChat={() => setIsAiChatOpen(true)} />;
       case 'compass_roadmap':
-        return <CareerRoadmapPage />;
+        return <CareerRoadmapPage studentProfile={studentProfile || currentUser} />;
       case 'compass_projects':
-        return <ProjectRecommendations />;
+        return <ProjectRecommendations studentProfile={studentProfile || currentUser} />;
       case 'compass_branches':
-        return <CareerBranchExplorer />;
+        return <CareerBranchExplorer studentProfile={studentProfile || currentUser} />;
 
       // Part 2: Opportunities
       case 'opp_recommended':
-        return <RecommendedOpportunities />;
+        return <RecommendedOpportunities studentProfile={studentProfile || currentUser} />;
       case 'opp_catalog':
-        return <OpportunitiesHub currentRole="student" />;
+        return <OpportunitiesHub currentRole="student" studentProfile={studentProfile || currentUser} />;
       case 'opp_saved_registered':
       case 'opp_feedback':
-        return <MyOpportunitiesJourney />;
+        return <MyOpportunitiesJourney studentProfile={studentProfile || currentUser} />;
 
       // Part 3: Academic Balance
       case 'academic_balance':
-        return <AcademicBalancePage />;
+        return <AcademicBalancePage studentProfile={studentProfile || currentUser} />;
 
       default:
-        return <CareerOverview studentProfile={studentProfile} onNavigate={setActiveTab} onOpenAiChat={() => setIsAiChatOpen(true)} />;
+        return <CareerOverview studentProfile={studentProfile || currentUser} onNavigate={setActiveTab} onOpenAiChat={() => setIsAiChatOpen(true)} />;
     }
   };
 

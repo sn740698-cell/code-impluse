@@ -9,9 +9,9 @@ import {
   Tag, 
   Link as LinkIcon, 
   MapPin, 
-  Image as ImageIcon,
   CheckCircle2
 } from 'lucide-react';
+import { publishOpportunityApi } from '../services/api';
 
 export default function TeacherPublishPage() {
   const [formData, setFormData] = useState({
@@ -37,10 +37,15 @@ export default function TeacherPublishPage() {
 
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 4000);
+    try {
+      await publishOpportunityApi(formData);
+      setSubmitted(true);
+      setTimeout(() => setSubmitted(false), 4000);
+    } catch (err) {
+      console.warn('Publish error:', err);
+    }
   };
 
   return (

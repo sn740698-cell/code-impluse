@@ -456,6 +456,40 @@ export async function registerForOpportunity(id) {
   return fetchApi(`/opportunities/${id}/register/`, { method: 'POST' });
 }
 
+export async function publishOpportunityApi(oppData) {
+  const created = {
+    id: Date.now(),
+    title: oppData.title,
+    type: oppData.type || 'Workshop',
+    organization: oppData.organization || 'Department Faculty',
+    speaker: oppData.speaker || 'Prof. Sarah Jenkins',
+    starts_at: oppData.starts_at || new Date().toISOString(),
+    registration_deadline: oppData.registration_deadline || new Date(Date.now() + 14 * 86400000).toISOString(),
+    location: oppData.location || 'Campus Tech Lab',
+    registration_link: oppData.registration_link || 'https://university.edu/register',
+    skills: typeof oppData.skills === 'string' ? oppData.skills.split(',').map(s => s.trim()) : (oppData.skills || ['Networking', 'Cybersecurity']),
+    description: oppData.description,
+    match_score: 96,
+    faculty_posted: true,
+    status: 'recommended',
+    why_recommended: "Posted & Assigned directly by your Faculty Advisor for your target career path."
+  };
+
+  MOCK_OPPORTUNITIES_CATALOG.unshift(created);
+  MOCK_OPPORTUNITIES.unshift(created);
+
+  try {
+    await fetchApi('/opportunities/', {
+      method: 'POST',
+      body: JSON.stringify(oppData)
+    });
+  } catch (err) {
+    console.warn('Backend opportunity post fallback:', err);
+  }
+
+  return created;
+}
+
 export async function sendChatMessage(message, profile = null) {
   const data = await fetchApi('/chat/', {
     method: 'POST',

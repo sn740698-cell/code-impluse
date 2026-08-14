@@ -10,7 +10,9 @@ import {
   ChevronDown, 
   ChevronUp, 
   Building,
-  CheckCircle2
+  CheckCircle2,
+  Award,
+  UserCheck
 } from 'lucide-react';
 import { 
   getRecommendedOpportunities, 
@@ -19,7 +21,7 @@ import {
   MOCK_OPPORTUNITIES_CATALOG 
 } from '../services/api';
 
-export default function RecommendedOpportunities() {
+export default function RecommendedOpportunities({ studentProfile }) {
   const [opportunities, setOpportunities] = useState(MOCK_OPPORTUNITIES_CATALOG);
   const [expandedId, setExpandedId] = useState(1);
 
@@ -28,21 +30,31 @@ export default function RecommendedOpportunities() {
       try {
         const data = await getRecommendedOpportunities();
         if (data && data.length > 0) {
-          setOpportunities(data);
+          // Merge with static catalog to preserve faculty uploaded items
+          const merged = [...data];
+          MOCK_OPPORTUNITIES_CATALOG.forEach(catItem => {
+            if (catItem.faculty_posted && !merged.some(m => m.id === catItem.id)) {
+              merged.unshift(catItem);
+            }
+          });
+          setOpportunities(merged);
+        } else {
+          setOpportunities([...MOCK_OPPORTUNITIES_CATALOG]);
         }
       } catch (err) {
-        console.warn('Failed to load opportunities from backend:', err);
+        console.warn('Opportunities load fallback:', err);
+        setOpportunities([...MOCK_OPPORTUNITIES_CATALOG]);
       }
     }
     loadData();
-  }, []);
+  }, [studentProfile]);
 
   const handleSave = async (id) => {
     setOpportunities(prev => prev.map(o => o.id === id ? { ...o, status: o.status === 'saved' ? 'recommended' : 'saved' } : o));
     try {
       await saveOpportunity(id);
     } catch (err) {
-      console.warn('Failed to save opportunity:', err);
+      console.warn('Save error:', err);
     }
   };
 
@@ -51,7 +63,7 @@ export default function RecommendedOpportunities() {
     try {
       await registerForOpportunity(id);
     } catch (err) {
-      console.warn('Failed to register for opportunity:', err);
+      console.warn('Register error:', err);
     }
   };
 
@@ -65,7 +77,7 @@ export default function RecommendedOpportunities() {
             <Sparkles size={24} color="var(--color-brand-primary)" /> AI Recommended Opportunities
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', margin: '4px 0 0 0' }}>
-            Multi-signal match engine ranking workshops, hackathons, and seminars for your career goals
+            Targeted for <strong>{studentProfile?.name || 'Alex Rivera'}</strong> • Goal: <strong>{studentProfile?.target_career || 'Cybersecurity Engineer'}</strong>
           </p>
         </div>
       </div>
@@ -81,16 +93,25 @@ export default function RecommendedOpportunities() {
               className="clean-card" 
               style={{
                 padding: '22px',
-                borderLeft: matchScore >= 90 ? '4px solid var(--color-brand-primary)' : '1px solid var(--border-clean)'
+                borderLeft: opp.faculty_posted ? '5px solid var(--color-purple)' : matchScore >= 90 ? '4px solid var(--color-brand-primary)' : '1px solid var(--border-clean)',
+                background: opp.faculty_posted ? 'rgba(139, 92, 246, 0.08)' : 'var(--bg-card)'
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px', flexWrap: 'wrap' }}>
                     <span className="badge badge-blue">{opp.type || 'Workshop'}</span>
+                    
+                    {opp.faculty_posted && (
+                      <span className="badge badge-purple" style={{ gap: '4px', background: 'var(--color-purple)', color: '#fff', fontWeight: 800 }}>
+                        <UserCheck size={13} /> ⭐ Posted & Assigned by Advisory Faculty
+                      </span>
+                    )}
+
                     <span className="badge badge-purple" style={{ gap: '4px' }}>
                       <Sparkles size={13} /> {matchScore}% Match
                     </span>
+                    
                     {opp.has_conflict && (
                       <span className="badge badge-yellow" style={{ fontSize: '0.68rem', gap: '4px' }}>
                         <AlertTriangle size={12} /> Workload Warning
@@ -101,7 +122,7 @@ export default function RecommendedOpportunities() {
                   <h3 style={{ fontSize: '1.2rem', fontWeight: 800, margin: '0 0 4px 0' }}>{opp.title}</h3>
                   
                   <div style={{ fontSize: '0.82rem', color: 'var(--color-purple)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <Building size={14} /> {opp.organization || 'University Chapter'} • Speaker: {opp.speaker || 'Senior Architect'}
+                    <Building size={14} /> {opp.organization || 'University Department'} • Speaker: {opp.speaker || 'Senior Advisor'}
                   </div>
                 </div>
 
@@ -124,13 +145,13 @@ export default function RecommendedOpportunities() {
                 </div>
               </div>
 
-              {/* Graphical Time & Location */}
+              {/* Time & Location */}
               <div style={{ display: 'flex', gap: '20px', fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Calendar size={14} color="var(--color-brand-primary)" /> {opp.starts_at ? new Date(opp.starts_at).toLocaleDateString() : 'Upcoming'}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <MapPin size={14} color="var(--color-purple)" /> {opp.location || 'Campus Cyber Lab'}
+                  <MapPin size={14} color="var(--color-purple)" /> {opp.location || 'Campus Tech Lab'}
                 </div>
               </div>
 
@@ -139,24 +160,7 @@ export default function RecommendedOpportunities() {
                 {opp.description}
               </p>
 
-              {/* Conflict Alert Banner if present */}
-              {opp.has_conflict && (
-                <div style={{
-                  padding: '12px 16px',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'rgba(245, 158, 11, 0.1)',
-                  border: '1px solid rgba(245, 158, 11, 0.3)',
-                  marginBottom: '14px',
-                  fontSize: '0.82rem'
-                }}>
-                  <div style={{ fontWeight: 700, color: 'var(--color-amber)', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                    <AlertTriangle size={14} /> Schedule & Exam Workload Warning
-                  </div>
-                  <div style={{ color: 'var(--text-main)' }}>{opp.conflict_warning}</div>
-                </div>
-              )}
-
-              {/* Why This Opportunity Match Breakdown */}
+              {/* Match Reason Accordion */}
               <div style={{
                 background: 'var(--bg-input)',
                 borderRadius: 'var(--radius-sm)',
@@ -169,7 +173,7 @@ export default function RecommendedOpportunities() {
                   style={{
                     width: '100%',
                     display: 'flex',
-                    justifyContent: 'space-between',
+                    justify: 'space-between',
                     alignItems: 'center',
                     padding: 0,
                     fontSize: '0.82rem',
@@ -177,36 +181,15 @@ export default function RecommendedOpportunities() {
                     fontWeight: 700
                   }}
                 >
-                  <span>Why is this recommended for you?</span>
+                  <span>Why is this recommended for your carrier profile?</span>
                   {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                 </button>
 
                 {isExpanded && (
                   <div style={{ marginTop: '10px', fontSize: '0.82rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <p style={{ color: 'var(--text-main)', margin: 0, background: 'var(--bg-card)', padding: '8px 12px', borderRadius: 'var(--radius-sm)' }}>
-                      <strong>AI Match Reason:</strong> {opp.why_recommended || 'Addresses your highest priority skill gap in Networking Fundamentals.'}
+                      <strong>AI Targeting Reason:</strong> {opp.why_recommended || 'Addresses key skill deficiencies for your chosen career goal.'}
                     </p>
-
-                    {opp.score_breakdown && (
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
-                        <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '8px', borderRadius: 'var(--radius-sm)' }}>
-                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>INTEREST</span>
-                          <div style={{ fontWeight: 700, color: 'var(--color-brand-primary)' }}>{opp.score_breakdown.interest_match}%</div>
-                        </div>
-                        <div style={{ background: 'rgba(139, 92, 246, 0.1)', padding: '8px', borderRadius: 'var(--radius-sm)' }}>
-                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>CAREER</span>
-                          <div style={{ fontWeight: 700, color: 'var(--color-purple)' }}>{opp.score_breakdown.career_match}%</div>
-                        </div>
-                        <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '8px', borderRadius: 'var(--radius-sm)' }}>
-                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>SKILL GAP</span>
-                          <div style={{ fontWeight: 700, color: 'var(--color-amber)' }}>{opp.score_breakdown.skill_gap_match}%</div>
-                        </div>
-                        <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '8px', borderRadius: 'var(--radius-sm)' }}>
-                          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>LEVEL</span>
-                          <div style={{ fontWeight: 700, color: 'var(--color-emerald)' }}>{opp.score_breakdown.level_compatibility}%</div>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 )}
               </div>

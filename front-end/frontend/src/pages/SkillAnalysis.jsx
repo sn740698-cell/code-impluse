@@ -13,15 +13,32 @@ import {
 } from 'lucide-react';
 import { getStudentSkills, MOCK_STUDENT_SKILLS } from '../services/api';
 
-export default function SkillAnalysis() {
+export default function SkillAnalysis({ studentProfile }) {
   const [skills, setSkills] = useState(MOCK_STUDENT_SKILLS);
   const [selectedSkill, setSelectedSkill] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadSkills() {
-      try {
-        const data = await getStudentSkills();
+    if (studentProfile?.skills && studentProfile.skills.length > 0) {
+      const formatted = studentProfile.skills.map(s => {
+        const prof = typeof s.proficiency === 'number' ? s.proficiency : 50;
+        const required = 85;
+        const gap = Math.max(0, required - prof);
+        const state = prof >= 70 ? 'Strong' : prof >= 40 ? 'Developing' : 'Beginner';
+        return {
+          name: s.name,
+          current: prof,
+          required: required,
+          gap: gap,
+          state: state,
+          source: 'Student Customized Entry & Academic Assessment',
+          is_demonstrated: prof >= 60,
+          evidence: `Verified proficiency rating of ${prof}% for ${s.name}`,
+          action: gap > 30 ? `Focus on foundational ${s.name} tutorials & hands-on lab exercises` : `Refine advanced ${s.name} project applications`
+        };
+      });
+      setSkills(formatted);
+    } else {
+      getStudentSkills().then(data => {
         if (data && data.length > 0) {
           const formatted = data.map(s => ({
             name: s.skill || s.name,
@@ -36,14 +53,9 @@ export default function SkillAnalysis() {
           }));
           setSkills(formatted);
         }
-      } catch (err) {
-        console.warn('Failed to load backend skills:', err);
-      } finally {
-        setLoading(false);
-      }
+      }).catch(() => null);
     }
-    loadSkills();
-  }, []);
+  }, [studentProfile]);
 
   const getStateBadgeClass = (state) => {
     switch (state) {
@@ -59,28 +71,28 @@ export default function SkillAnalysis() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
       
       {/* Visual Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <BarChart2 size={24} color="var(--color-brand-primary)" /> Skill Matrix & Diagnostic Evidence
+            <BarChart2 size={24} color="var(--color-brand-primary)" /> Skill Matrix & Diagnostic Analysis
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', margin: '4px 0 0 0' }}>
-            Demonstrated proficiency vs self-reported skill ratings
+            Analyzing customized carrier skills for: <strong>{studentProfile?.name || 'Alex Rivera'}</strong> ({studentProfile?.target_career || 'Cybersecurity Engineer'})
           </p>
         </div>
 
-        {/* Visual Summary Counters */}
+        {/* Visual Counters */}
         <div style={{ display: 'flex', gap: '12px' }}>
           <div className="clean-card" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <CheckCircle2 size={16} color="var(--color-emerald)" />
             <span style={{ fontSize: '0.82rem', fontWeight: 700 }}>
-              {skills.filter(s => s.is_demonstrated).length} Verified
+              {skills.filter(s => s.is_demonstrated).length} Demonstrated
             </span>
           </div>
           <div className="clean-card" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ShieldAlert size={16} color="var(--color-rose)" />
             <span style={{ fontSize: '0.82rem', fontWeight: 700 }}>
-              {skills.filter(s => s.gap > 30).length} Critical Gaps
+              {skills.filter(s => s.gap > 30).length} Skill Deficiencies
             </span>
           </div>
         </div>
@@ -150,7 +162,7 @@ export default function SkillAnalysis() {
         </div>
       </div>
 
-      {/* Detail Modal for Selected Skill */}
+      {/* Modal for Skill Detail */}
       {selectedSkill && (
         <div style={{
           position: 'fixed',
