@@ -429,12 +429,37 @@ export function saveCustomStudentProfile(profile) {
     const existingStr = localStorage.getItem('mentora_custom_students');
     let existing = existingStr ? JSON.parse(existingStr) : [];
 
+    const normalizeGpaVal = (v) => {
+      if (v === undefined || v === null) return 9.60;
+      const num = typeof v === 'number' ? v : parseFloat(v);
+      if (isNaN(num)) return 9.60;
+      return num <= 4.0 ? Number((num * 2.5).toFixed(2)) : Number(num.toFixed(2));
+    };
+
+    const studentGpaNum = normalizeGpaVal(profile.gpa);
+    const studentGpaStr = studentGpaNum.toFixed(2);
+    const baseGpa = Math.max(6.0, Number((studentGpaNum - 0.50).toFixed(2)));
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    const readinessVal = profile.career_readiness || 60;
+    const baseR = Math.max(20, readinessVal - 35);
+
+    const perfHistory = months.map((m, i) => {
+      const factor = i / (months.length - 1);
+      return {
+        month: m,
+        readiness: Math.round(baseR + (readinessVal - baseR) * factor),
+        skills: Math.round(baseR - 5 + (readinessVal - baseR + 5) * factor),
+        gpa: Number((baseGpa + (studentGpaNum - baseGpa) * factor).toFixed(2))
+      };
+    });
+
     const formattedStudent = {
       id: profile.id || Date.now(),
       name: profile.name,
       email: profile.email || `${profile.name.toLowerCase().replace(/\s+/g, '.')}@university.edu`,
       career_goal: profile.target_career || profile.career_goal || 'Cybersecurity Engineer',
-      readiness: profile.career_readiness || 60,
+      readiness: readinessVal,
       status: 'good_standing',
       lacking_skills: profile.skills && profile.skills.length > 0
         ? profile.skills.filter(s => (s.proficiency || 50) < 45).map(s => `${s.name} (${s.proficiency}%)`)
@@ -442,16 +467,9 @@ export function saveCustomStudentProfile(profile) {
       strongest_skill: profile.skills && profile.skills.length > 0
         ? `${[...profile.skills].sort((a,b) => (b.proficiency||0)-(a.proficiency||0))[0].name} (${[...profile.skills].sort((a,b) => (b.proficiency||0)-(a.proficiency||0))[0].proficiency}%)`
         : "Python Programming (65%)",
-      gpa: profile.gpa || "9.60",
+      gpa: studentGpaStr,
       last_active: "Just now",
-      performance_history: [
-        { month: 'Jan', readiness: 40, gpa: 9.10, skills: 35 },
-        { month: 'Feb', readiness: 45, gpa: 9.20, skills: 40 },
-        { month: 'Mar', readiness: 50, gpa: 9.35, skills: 48 },
-        { month: 'Apr', readiness: 55, gpa: 9.50, skills: 54 },
-        { month: 'May', readiness: profile.career_readiness || 60, gpa: 9.60, skills: 58 },
-        { month: 'Jun', readiness: Math.min(100, (profile.career_readiness || 60) + 6), gpa: 9.65, skills: 64 }
-      ]
+      performance_history: perfHistory
     };
 
     const index = existing.findIndex(s => s.name.toLowerCase() === profile.name.toLowerCase() || (profile.email && s.email === profile.email));
