@@ -12,75 +12,70 @@ import { MOCK_CAREER_GOALS } from '../services/api';
 import PerformanceGraph from '../components/PerformanceGraph';
 
 export default function CareerOverview({ studentProfile, currentUser, onNavigate, onOpenAiChat }) {
-  const [selectedGoalId, setSelectedGoalId] = useState(1);
-  const selectedGoal = MOCK_CAREER_GOALS.find(g => g.id === selectedGoalId) || MOCK_CAREER_GOALS[0];
-  const activeGoal = studentProfile?.target_career
-    ? { ...selectedGoal, name: studentProfile.target_career, description: `Your personalized roadmap is being prepared for ${studentProfile.target_career}.` }
-    : selectedGoal;
-
-  const studentName = studentProfile?.name || currentUser?.name || 'Alex Rivera';
+  const activeStudent = studentProfile || currentUser;
+  const targetCareerName = activeStudent?.target_career || 'Cybersecurity Engineer';
+  const studentName = activeStudent?.name || 'Alex Rivera';
+  const readinessVal = activeStudent?.career_readiness || 58;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       
-      {/* Target Career & AI Readiness Header */}
+      {/* Target Career & Profile Banner */}
       <div className="clean-card" style={{
         padding: '24px 28px',
         background: 'rgba(59, 130, 246, 0.08)',
         border: '1px solid rgba(59, 130, 246, 0.25)'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div>
             <div className="badge badge-blue" style={{ marginBottom: '8px' }}>
               Student Profile: {studentName}
             </div>
-            <h2 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '0 0 6px 0' }}>
-              Target Career: <span style={{ color: 'var(--color-brand-primary)' }}>{activeGoal.name}</span>
+            <h2 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '0 0 4px 0' }}>
+              Target Goal: <span style={{ color: 'var(--color-brand-primary)' }}>{targetCareerName}</span>
             </h2>
-            <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', maxWidth: '650px', margin: 0 }}>
-              {activeGoal.description}
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', margin: 0 }}>
+              AI Personalized Career Roadmap & Trajectory Analysis
             </p>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button onClick={onOpenAiChat} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.82rem' }}>
-              <Sparkles size={15} /> AI Career Analysis
-            </button>
-          </div>
+          <button onClick={onOpenAiChat} className="btn-primary" style={{ padding: '8px 16px', fontSize: '0.82rem', gap: '6px' }}>
+            <Sparkles size={15} /> Ask AI Compass
+          </button>
         </div>
       </div>
 
-      {/* Minimal Stat Cards */}
+      {/* Minimal 4-Stat Metric Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
         
-        {/* Estimated Career Readiness */}
+        {/* Career Readiness */}
         <div className="clean-card" style={{ padding: '20px' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>CAREER READINESS INDEX</span>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase' }}>CAREER READINESS INDEX</span>
           <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--color-brand-primary)', lineHeight: 1, marginTop: '6px' }}>
-            {activeGoal.readiness}%
+            {readinessVal}%
           </div>
-          <div style={{ fontSize: '0.72rem', color: 'var(--color-emerald)', marginTop: '6px' }}>
-            +6% improvement this month
+          <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: 'var(--radius-pill)', marginTop: '10px', overflow: 'hidden' }}>
+            <div style={{ width: `${readinessVal}%`, height: '100%', background: 'var(--color-brand-primary)', borderRadius: 'var(--radius-pill)' }} />
           </div>
         </div>
 
-        {/* Current vs Target Level */}
+        {/* Current Level */}
         <div className="clean-card" style={{ padding: '20px' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>CURRENT LEVEL</span>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase' }}>CURRENT LEVEL</span>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginTop: '6px' }}>
             <span style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--color-purple)' }}>Level 3</span>
-            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>/ Target Level 8</span>
+            <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>/ Target Level 8</span>
           </div>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-            Stage 1 Foundations Active
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '6px' }}>
+            Foundations Stage Active
           </div>
         </div>
 
         {/* Strongest Area */}
         <div className="clean-card" style={{ padding: '20px' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>STRONGEST AREA</span>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase' }}>STRONGEST SKILL</span>
           <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-emerald)', marginTop: '8px' }}>
-            {activeGoal.strongest_area}
+            Python Programming (65%)
           </div>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
             Demonstrated Grade: 92%
@@ -89,9 +84,9 @@ export default function CareerOverview({ studentProfile, currentUser, onNavigate
 
         {/* Major Skill Gap */}
         <div className="clean-card" style={{ padding: '20px', borderLeft: '4px solid var(--color-rose)' }}>
-          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)' }}>LARGEST SKILL GAP</span>
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-subtle)', textTransform: 'uppercase' }}>PRIMARY SKILL GAP</span>
           <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--color-rose)', marginTop: '8px' }}>
-            {activeGoal.largest_gap}
+            Networking (25%)
           </div>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
             Current: 25% vs Required: 80%
@@ -100,10 +95,10 @@ export default function CareerOverview({ studentProfile, currentUser, onNavigate
 
       </div>
 
-      {/* Overall Performance Graph */}
-      <PerformanceGraph />
+      {/* Live Dynamic Performance Graph */}
+      <PerformanceGraph studentProfile={activeStudent} />
 
-      {/* Quick Access Navigation Cards */}
+      {/* Clean Navigation Quick Tiles */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
         
         <div 
@@ -112,10 +107,9 @@ export default function CareerOverview({ studentProfile, currentUser, onNavigate
           style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div>
-            <span className="badge badge-blue" style={{ marginBottom: '6px' }}>Part 1.2</span>
-            <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Current Skill Analysis</h4>
+            <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Skill Analysis Matrix</h4>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
-              Self-reported vs demonstrated skill evidence
+              Demonstrated proficiency & evidence
             </p>
           </div>
           <ArrowRight size={18} color="var(--color-brand-primary)" />
@@ -127,10 +121,9 @@ export default function CareerOverview({ studentProfile, currentUser, onNavigate
           style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div>
-            <span className="badge badge-purple" style={{ marginBottom: '6px' }}>Part 1.3 & 1.4</span>
-            <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Goal vs Skill Gap & AI Analysis</h4>
+            <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Prerequisite Skill Gaps</h4>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
-              Prerequisite dependency chains & AI diagnosis
+              Dependency graph & bottleneck analysis
             </p>
           </div>
           <ArrowRight size={18} color="var(--color-purple)" />
@@ -142,10 +135,9 @@ export default function CareerOverview({ studentProfile, currentUser, onNavigate
           style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
         >
           <div>
-            <span className="badge badge-yellow" style={{ marginBottom: '6px' }}>Part 1.5 & 1.6</span>
-            <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Personalized Roadmap & Milestones</h4>
+            <h4 style={{ fontSize: '1.05rem', fontWeight: 700, margin: 0 }}>Personalized Roadmap</h4>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
-              Foundations, Core Security, and Specialization stages
+              Stage-by-stage learning milestones
             </p>
           </div>
           <ArrowRight size={18} color="var(--color-amber)" />
