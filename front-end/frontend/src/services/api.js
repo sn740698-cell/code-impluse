@@ -423,9 +423,79 @@ export async function getStudentTelemetry() {
   return data?.results && data.results.length > 0 ? data.results : null;
 }
 
+export function saveCustomStudentProfile(profile) {
+  if (!profile || !profile.name) return;
+  try {
+    const existingStr = localStorage.getItem('mentora_custom_students');
+    let existing = existingStr ? JSON.parse(existingStr) : [];
+
+    const formattedStudent = {
+      id: profile.id || Date.now(),
+      name: profile.name,
+      email: profile.email || `${profile.name.toLowerCase().replace(/\s+/g, '.')}@university.edu`,
+      career_goal: profile.target_career || profile.career_goal || 'Cybersecurity Engineer',
+      readiness: profile.career_readiness || 60,
+      status: 'good_standing',
+      lacking_skills: profile.skills && profile.skills.length > 0
+        ? profile.skills.filter(s => (s.proficiency || 50) < 45).map(s => `${s.name} (${s.proficiency}%)`)
+        : ["Networking Fundamentals (25%)", "Linux Administration (30%)"],
+      strongest_skill: profile.skills && profile.skills.length > 0
+        ? `${[...profile.skills].sort((a,b) => (b.proficiency||0)-(a.proficiency||0))[0].name} (${[...profile.skills].sort((a,b) => (b.proficiency||0)-(a.proficiency||0))[0].proficiency}%)`
+        : "Python Programming (65%)",
+      gpa: profile.gpa || "9.60",
+      last_active: "Just now",
+      performance_history: [
+        { month: 'Jan', readiness: 40, gpa: 9.10, skills: 35 },
+        { month: 'Feb', readiness: 45, gpa: 9.20, skills: 40 },
+        { month: 'Mar', readiness: 50, gpa: 9.35, skills: 48 },
+        { month: 'Apr', readiness: 55, gpa: 9.50, skills: 54 },
+        { month: 'May', readiness: profile.career_readiness || 60, gpa: 9.60, skills: 58 },
+        { month: 'Jun', readiness: Math.min(100, (profile.career_readiness || 60) + 6), gpa: 9.65, skills: 64 }
+      ]
+    };
+
+    const index = existing.findIndex(s => s.name.toLowerCase() === profile.name.toLowerCase() || (profile.email && s.email === profile.email));
+    if (index >= 0) {
+      existing[index] = { ...existing[index], ...formattedStudent };
+    } else {
+      existing.unshift(formattedStudent);
+    }
+
+    localStorage.setItem('mentora_custom_students', JSON.stringify(existing));
+  } catch (err) {
+    console.warn('Failed to save custom student profile:', err);
+  }
+}
+
 export async function getTeacherStudents() {
-  const data = await fetchApi('/teacher/students/');
-  return data?.results && data.results.length > 0 ? data.results : null;
+  let backendStudents = [];
+  try {
+    const data = await fetchApi('/teacher/students/');
+    if (data?.results && data.results.length > 0) {
+      backendStudents = data.results;
+    }
+  } catch (err) {
+    console.warn('Backend student roster fetch fallback:', err);
+  }
+
+  let customStudents = [];
+  try {
+    const customStr = localStorage.getItem('mentora_custom_students');
+    if (customStr) {
+      customStudents = JSON.parse(customStr);
+    }
+  } catch (err) {
+    console.warn('Failed to parse custom students:', err);
+  }
+
+  const merged = [...customStudents];
+  backendStudents.forEach(bs => {
+    if (!merged.some(cs => cs.name.toLowerCase() === bs.name.toLowerCase())) {
+      merged.push(bs);
+    }
+  });
+
+  return merged.length > 0 ? merged : backendStudents;
 }
 
 export async function getSkillRoadmap() {

@@ -28,7 +28,7 @@ import MyOpportunitiesJourney from './pages/MyOpportunitiesJourney';
 
 // Part 3: Academic Balance Page
 import AcademicBalancePage from './pages/AcademicBalancePage';
-import { getCurrentUserApi, logoutApi } from './services/api';
+import { getCurrentUserApi, logoutApi, saveCustomStudentProfile } from './services/api';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null); // null = show LoginPage
@@ -85,13 +85,16 @@ export default function App() {
       };
       setCurrentUser(studentObj);
       setStudentProfile(studentObj);
+      saveCustomStudentProfile(studentObj);
       setActiveTab('compass_overview');
     }
   };
 
   const handleOnboardingComplete = (profileData) => {
     setStudentProfile(profileData);
-    setCurrentUser(prev => ({ ...(prev || {}), ...profileData }));
+    const updated = { ...(currentUser || {}), ...profileData };
+    setCurrentUser(updated);
+    saveCustomStudentProfile(updated);
     setHasCompletedOnboarding(true);
     setActiveTab('compass_overview');
   };
