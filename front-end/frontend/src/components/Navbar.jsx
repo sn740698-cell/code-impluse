@@ -184,11 +184,12 @@ export default function Navbar({ currentUser, onLogout, theme, toggleTheme, onOp
 
           <button
             onClick={onLogout}
-            className="btn-ghost"
-            style={{ padding: '6px', borderRadius: '50%', marginLeft: '4px' }}
-            title="Sign Out"
+            className="btn-secondary"
+            style={{ padding: '6px 12px', fontSize: '0.78rem', borderRadius: 'var(--radius-pill)', gap: '6px' }}
+            title="Sign Out to Return to Login Page"
           >
-            <LogOut size={16} color="var(--text-subtle)" />
+            <LogOut size={14} color="var(--color-rose)" />
+            <span>Sign Out</span>
           </button>
         </div>
 
