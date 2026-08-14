@@ -4,9 +4,11 @@ import { getStudentTelemetry } from '../services/api';
 
 export default function PerformanceGraph({ data: initialData, title = "Overall Performance & Skill Progression", height = 260, studentProfile }) {
   const normalizeGpa = (val) => {
-    if (typeof val !== 'number') val = parseFloat(val) || 9.0;
-    // If val is on old 4.0 scale (e.g. 3.84), scale to 10.0
-    return val <= 4.0 ? Number((val * 2.5).toFixed(2)) : Number(val.toFixed(2));
+    if (val === undefined || val === null) return 9.60;
+    const num = typeof val === 'number' ? val : parseFloat(val);
+    if (isNaN(num)) return 9.60;
+    // Scale 4.0 system to 10.0 system if < 4.0
+    return num <= 4.0 ? Number((num * 2.5).toFixed(2)) : Number(num.toFixed(2));
   };
 
   const [points, setPoints] = useState(() => {
@@ -26,8 +28,43 @@ export default function PerformanceGraph({ data: initialData, title = "Overall P
   const [hoveredIdx, setHoveredIdx] = useState(null);
   const [selectedPoint, setSelectedPoint] = useState(null);
 
-  // Load backend telemetry if available
+  // Dynamically calculate graph trajectory from props (initialData or studentProfile)
   useEffect(() => {
+    if (initialData && initialData.length > 0) {
+      const formatted = initialData.map(p => ({ ...p, gpa: normalizeGpa(p.gpa) }));
+      setPoints(formatted);
+      setSelectedPoint(formatted[formatted.length - 1]);
+      return;
+    }
+
+    if (studentProfile?.performance_history && studentProfile.performance_history.length > 0) {
+      const formatted = studentProfile.performance_history.map(p => ({ ...p, gpa: normalizeGpa(p.gpa) }));
+      setPoints(formatted);
+      setSelectedPoint(formatted[formatted.length - 1]);
+      return;
+    }
+
+    if (studentProfile?.career_readiness || studentProfile?.gpa) {
+      const targetReadiness = studentProfile.career_readiness || 60;
+      const baseR = Math.max(20, targetReadiness - 35);
+      const targetGpa = studentProfile?.gpa ? normalizeGpa(studentProfile.gpa) : 9.60;
+      const baseGpa = Math.max(6.0, Number((targetGpa - 0.50).toFixed(2)));
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+      const computed = months.map((m, i) => {
+        const factor = i / (months.length - 1);
+        return {
+          month: m,
+          readiness: Math.round(baseR + (targetReadiness - baseR) * factor),
+          skills: Math.round(baseR - 5 + (targetReadiness - baseR + 5) * factor),
+          gpa: Number((baseGpa + (targetGpa - baseGpa) * factor).toFixed(2))
+        };
+      });
+      setPoints(computed);
+      setSelectedPoint(computed[computed.length - 1]);
+      return;
+    }
+
+    // Load backend telemetry fallback
     async function loadTelemetry() {
       try {
         const liveResults = await getStudentTelemetry();
@@ -37,31 +74,11 @@ export default function PerformanceGraph({ data: initialData, title = "Overall P
           setSelectedPoint(formatted[formatted.length - 1]);
         }
       } catch (err) {
-        console.warn('Telemetry load failed, using local profile model:', err);
+        console.warn('Telemetry load fallback:', err);
       }
     }
     loadTelemetry();
-  }, [studentProfile]);
-
-  // Recalculate trajectory dynamically if studentProfile prop updates
-  useEffect(() => {
-    if (studentProfile?.career_readiness) {
-      const targetReadiness = studentProfile.career_readiness;
-      const baseR = Math.max(20, targetReadiness - 35);
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-      const computed = months.map((m, i) => {
-        const factor = i / (months.length - 1);
-        return {
-          month: m,
-          readiness: Math.round(baseR + (targetReadiness - baseR) * factor),
-          skills: Math.round(baseR - 5 + (targetReadiness - baseR + 5) * factor),
-          gpa: Number((8.75 + 0.85 * factor).toFixed(2))
-        };
-      });
-      setPoints(computed);
-      setSelectedPoint(computed[computed.length - 1]);
-    }
-  }, [studentProfile]);
+  }, [initialData, studentProfile]);
 
   // Filter points based on timeframe selection
   const displayedPoints = timeframe === '3m' ? points.slice(-3) : points;
@@ -79,7 +96,7 @@ export default function PerformanceGraph({ data: initialData, title = "Overall P
 
   // Metric scale bounds
   const isGpa = activeMetric === 'gpa';
-  const minVal = 0;
+  const minVal = isGpa ? 6.0 : 0;
   const maxVal = isGpa ? 10.0 : 100;
 
   const getVal = (pt) => isGpa ? normalizeGpa(pt.gpa) : pt[activeMetric];
@@ -88,7 +105,7 @@ export default function PerformanceGraph({ data: initialData, title = "Overall P
   const coords = displayedPoints.map((pt, i) => {
     const x = paddingLeft + (i / Math.max(1, displayedPoints.length - 1)) * drawWidth;
     const rawVal = getVal(pt);
-    // Clamp normalized between 0 and 1
+    // Clamp normalized value between 0 and 1 relative to minVal/maxVal
     const normalized = Math.min(1, Math.max(0, (rawVal - minVal) / (maxVal - minVal)));
     const y = paddingTop + drawHeight - normalized * drawHeight;
 
@@ -236,7 +253,7 @@ export default function PerformanceGraph({ data: initialData, title = "Overall P
           </defs>
 
           {/* Grid Lines & Y-Axis Scale */}
-          {(isGpa ? [0, 2.5, 5.0, 7.5, 10.0] : [0, 25, 50, 75, 100]).map((val, idx) => {
+          {(isGpa ? [6.0, 7.0, 8.0, 9.0, 10.0] : [0, 25, 50, 75, 100]).map((val, idx) => {
             const normalized = (val - minVal) / (maxVal - minVal);
             const y = paddingTop + drawHeight - normalized * drawHeight;
             return (
@@ -335,7 +352,7 @@ export default function PerformanceGraph({ data: initialData, title = "Overall P
                   style={{ transition: 'all 0.2s ease' }}
                 />
 
-                {/* X-Axis Month Label Rendered Directly Inside SVG to Prevent Any Overlap */}
+                {/* X-Axis Month Label Rendered Directly Inside SVG */}
                 <text
                   x={c.x}
                   y={viewHeight - 8}

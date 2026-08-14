@@ -311,7 +311,7 @@ export default function TeacherDashboard() {
           <PerformanceGraph
             data={selectedStudent.performance_history}
             title={`${selectedStudent.name} — Career Trajectory Graph`}
-            studentProfile={{ career_readiness: selectedStudent.readiness }}
+            studentProfile={selectedStudent}
           />
 
           {/* Detailed Student Telemetry Card */}
