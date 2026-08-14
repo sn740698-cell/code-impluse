@@ -18,18 +18,21 @@ def _openrouter_configs():
 
 def generate(messages, *, json_mode=False):
     """Return ``(content, provider)``. Provider failures never expose secrets."""
+    # 1. Try Local Ollama first
     try:
         payload = {"model": settings.OLLAMA_MODEL, "messages": messages, "stream": False}
         if json_mode:
             payload["format"] = "json"
         response = requests.post(settings.OLLAMA_URL, json=payload, timeout=settings.OLLAMA_TIMEOUT)
-        response.raise_for_status()
-        content = response.json()["message"]["content"].strip()
-        if content:
-            return content, "ollama"
-    except (requests.RequestException, KeyError, TypeError, ValueError):
+        if response.status_code == 200:
+            data = response.json()
+            content = data.get("message", {}).get("content", "").strip()
+            if content:
+                return content, "ollama"
+    except Exception:
         pass
 
+    # 2. Fallback to OpenRouter models
     for api_key, model in _openrouter_configs():
         if not api_key:
             continue
@@ -40,15 +43,23 @@ def generate(messages, *, json_mode=False):
             response = requests.post(
                 settings.OPENROUTER_URL,
                 json=payload,
-                headers={"Authorization": f"Bearer {api_key}", "HTTP-Referer": "http://localhost:8000", "X-Title": "AI Career Compass"},
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "HTTP-Referer": "http://localhost:8000",
+                    "X-Title": "AI Career Compass"
+                },
                 timeout=settings.OPENROUTER_TIMEOUT,
             )
-            response.raise_for_status()
-            content = response.json()["choices"][0]["message"]["content"].strip()
-            if content:
-                return content, "openrouter"
-        except (requests.RequestException, KeyError, TypeError, ValueError):
+            if response.status_code == 200:
+                res_data = response.json()
+                choices = res_data.get("choices", [])
+                if choices:
+                    content = choices[0].get("message", {}).get("content", "").strip()
+                    if content:
+                        return content, "openrouter"
+        except Exception:
             continue
+
     raise AIUnavailable("No configured AI provider is available.")
 
 
@@ -63,6 +74,9 @@ def ollama_explanation(context):
                    ("recommendation_reason", "career_relevance", "schedule_warning", "recommended_action")}
         return allowed
     except (AIUnavailable, ValueError, KeyError, TypeError):
-        return {"recommendation_reason": "This opportunity addresses your current learning priorities.",
-                "career_relevance": "Calculated from your career goal and skill gaps.",
-                "schedule_warning": "", "recommended_action": "Review details and register if it fits your schedule."}
+        return {
+            "recommendation_reason": "This opportunity addresses your current learning priorities.",
+            "career_relevance": "Calculated from your career goal and skill gaps.",
+            "schedule_warning": "",
+            "recommended_action": "Review details and register if it fits your schedule."
+        }

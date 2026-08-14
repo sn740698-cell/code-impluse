@@ -1,14 +1,17 @@
 // Unified API Service Layer for AI Career Compass & Opportunity Recommendation System
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+// Vite proxies /api to Django in development. Set VITE_API_BASE_URL when the
+// frontend and backend are deployed on separate hosts.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
-async function fetchApi(endpoint, options = {}) {
+export async function fetchApi(endpoint, options = {}) {
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
       },
+      credentials: 'include',
       ...options,
     });
     if (!response.ok) {
@@ -364,25 +367,83 @@ export const MOCK_TEACHER_OPPORTUNITY_ANALYTICS = {
   ]
 };
 
+// // Authentication API Functions
+export async function loginApi({ email, password, role }) {
+  const data = await fetchApi('/accounts/login/', {
+    method: 'POST',
+    body: JSON.stringify({ email, password, role }),
+  });
+  return data?.user || null;
+}
+
+export async function logoutApi() {
+  return fetchApi('/accounts/logout/', { method: 'POST' });
+}
+
+export async function getCurrentUserApi() {
+  const data = await fetchApi('/accounts/me/');
+  return data?.user || null;
+}
+
 // API Functions
 export async function getStudentCareerGoal() {
   const data = await fetchApi('/student/career/');
-  return data || { career: MOCK_CAREER_GOALS[0] };
+  return (data && data.career) ? data : { career: MOCK_CAREER_GOALS[0] };
 }
 
 export async function getStudentSkills() {
   const data = await fetchApi('/student/skills/');
-  return data?.results || MOCK_STUDENT_SKILLS;
+  return (data?.results && data.results.length > 0) ? data.results : MOCK_STUDENT_SKILLS;
+}
+
+export async function getCareers() {
+  const data = await fetchApi('/careers/');
+  return (data?.results && data.results.length > 0) ? data.results : MOCK_CAREER_GOALS;
+}
+
+export async function setStudentCareer(careerId, targetLevel = 80) {
+  return fetchApi('/student/career/', {
+    method: 'POST',
+    body: JSON.stringify({ career_id: careerId, target_level: targetLevel }),
+  });
+}
+
+export async function getCareerReadiness() {
+  const data = await fetchApi('/student/career-readiness/');
+  return data || { readiness: MOCK_CAREER_GOALS[0].readiness };
+}
+
+export async function getStudentSkillGaps() {
+  const data = await fetchApi('/student/skill-gaps/');
+  return (data?.results && data.results.length > 0) ? data.results : MOCK_STUDENT_SKILLS;
 }
 
 export async function getSkillRoadmap() {
   const data = await fetchApi('/student/roadmap/');
-  return data?.results || MOCK_CAREER_ROADMAP;
+  return (data?.results && data.results.length > 0) ? data.results : MOCK_CAREER_ROADMAP;
+}
+
+export async function getProjectRecommendations() {
+  const data = await fetchApi('/student/projects/');
+  return (data?.results && data.results.length > 0) ? data.results : MOCK_PROJECT_RECOMMENDATIONS;
 }
 
 export async function getOpportunities() {
   const data = await fetchApi('/opportunities/');
-  return data?.results || MOCK_OPPORTUNITIES_CATALOG;
+  return (data?.results && data.results.length > 0) ? data.results : MOCK_OPPORTUNITIES_CATALOG;
+}
+
+export async function getRecommendedOpportunities() {
+  const data = await fetchApi('/opportunities/recommended/');
+  return (data?.results && data.results.length > 0) ? data.results : MOCK_OPPORTUNITIES_CATALOG;
+}
+
+export async function saveOpportunity(id) {
+  return fetchApi(`/opportunities/${id}/save/`, { method: 'POST' });
+}
+
+export async function registerForOpportunity(id) {
+  return fetchApi(`/opportunities/${id}/register/`, { method: 'POST' });
 }
 
 export async function sendChatMessage(message) {

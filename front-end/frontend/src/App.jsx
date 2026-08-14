@@ -28,6 +28,7 @@ import MyOpportunitiesJourney from './pages/MyOpportunitiesJourney';
 
 // Part 3: Academic Balance Page
 import AcademicBalancePage from './pages/AcademicBalancePage';
+import { getCurrentUserApi, logoutApi } from './services/api';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null); // null = show LoginPage
@@ -41,6 +42,23 @@ export default function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
+
+  useEffect(() => {
+    async function checkSession() {
+      try {
+        const user = await getCurrentUserApi();
+        if (user) {
+          setCurrentUser(user);
+          if (user.role === 'teacher') {
+            setActiveTab('teacher_dashboard');
+          }
+        }
+      } catch (err) {
+        console.warn('Session check failed:', err);
+      }
+    }
+    checkSession();
+  }, []);
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
@@ -61,7 +79,12 @@ export default function App() {
     setActiveTab('compass_overview');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await logoutApi();
+    } catch (err) {
+      console.warn('Logout error:', err);
+    }
     setCurrentUser(null);
     setHasCompletedOnboarding(false);
   };

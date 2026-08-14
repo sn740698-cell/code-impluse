@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   GraduationCap, 
   Target, 
@@ -6,14 +6,14 @@ import {
   Sparkles, 
   Check, 
   ArrowRight, 
-  BookOpen,
-  Compass
+  UserCheck
 } from 'lucide-react';
-import { MOCK_CAREER_GOALS } from '../services/api';
+import { getCareers, MOCK_CAREER_GOALS, setStudentCareer } from '../services/api';
 
 export default function StudentOnboarding({ onComplete }) {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
+    name: 'Alex Rivera',
     major: 'Computer Science & Cybersecurity',
     academic_year: '3rd Year (Junior)',
     gpa: '3.84',
@@ -26,12 +26,22 @@ export default function StudentOnboarding({ onComplete }) {
     ],
     interests: ['Cybersecurity', 'Network Architecture', 'AI Security', 'Sports Analytics']
   });
+  const [careerOptions, setCareerOptions] = useState(MOCK_CAREER_GOALS);
+  const [isCustomCareer, setIsCustomCareer] = useState(false);
+
+  useEffect(() => {
+    getCareers().then(setCareerOptions);
+  }, []);
 
   const handleNextStep = (e) => {
     e.preventDefault();
     if (step < 3) {
       setStep(step + 1);
     } else {
+      const selected = careerOptions.find(goal => goal.name === formData.target_career);
+      if (selected?.id) {
+        setStudentCareer(selected.id).catch(() => null);
+      }
       onComplete(formData);
     }
   };
@@ -98,6 +108,18 @@ export default function StudentOnboarding({ onComplete }) {
           {step === 1 && (
             <>
               <div>
+                <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Full Name</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="clean-input"
+                  placeholder="Your Full Name"
+                />
+              </div>
+
+              <div>
                 <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '4px' }}>Major / Field of Study</label>
                 <input
                   type="text"
@@ -142,7 +164,7 @@ export default function StudentOnboarding({ onComplete }) {
             <div>
               <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '10px' }}>Select Your Primary Target Career Goal</label>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {MOCK_CAREER_GOALS.map(goal => {
+                {careerOptions.map(goal => {
                   const isSel = formData.target_career === goal.name;
                   return (
                     <div
@@ -166,6 +188,25 @@ export default function StudentOnboarding({ onComplete }) {
                   );
                 })}
               </div>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                <input
+                  type="checkbox"
+                  checked={isCustomCareer}
+                  onChange={(e) => setIsCustomCareer(e.target.checked)}
+                />
+                My target career is not listed
+              </label>
+              {isCustomCareer && (
+                <input
+                  type="text"
+                  required
+                  value={formData.target_career}
+                  onChange={(e) => setFormData({ ...formData, target_career: e.target.value })}
+                  className="clean-input"
+                  placeholder="Example: Data Scientist, UX Designer, Cloud Engineer"
+                  style={{ marginTop: '10px' }}
+                />
+              )}
             </div>
           )}
 

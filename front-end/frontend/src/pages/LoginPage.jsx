@@ -9,32 +9,53 @@ import {
   Sparkles,
   ShieldCheck
 } from 'lucide-react';
+import { loginApi } from '../services/api';
 
 export default function LoginPage({ onLogin }) {
   const [role, setRole] = useState('student'); // 'student' | 'teacher'
+  const [name, setName] = useState('Alex Rivera');
   const [email, setEmail] = useState('alex.rivera@university.edu');
   const [password, setPassword] = useState('••••••••••••');
   const [rememberMe, setRememberMe] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleQuickFillStudent = () => {
     setRole('student');
+    setName('Alex Rivera');
     setEmail('alex.rivera@university.edu');
     setPassword('student123');
   };
 
   const handleQuickFillTeacher = () => {
     setRole('teacher');
+    setName('Prof. Sarah Jenkins');
     setEmail('prof.sarah@university.edu');
     setPassword('teacher123');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onLogin({
-      name: role === 'student' ? 'Alex Rivera' : 'Prof. Sarah Jenkins',
-      email,
-      role
-    });
+    setIsLoading(true);
+    try {
+      const user = await loginApi({ email, password, role });
+      if (user) {
+        onLogin({ ...user, name: name || user.name });
+      } else {
+        onLogin({
+          name: name || (role === 'student' ? 'Alex Rivera' : 'Prof. Sarah Jenkins'),
+          email,
+          role
+        });
+      }
+    } catch {
+      onLogin({
+        name: name || (role === 'student' ? 'Alex Rivera' : 'Prof. Sarah Jenkins'),
+        email,
+        role
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -132,6 +153,24 @@ export default function LoginPage({ onLogin }) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+              Full Name
+            </label>
+            <div style={{ position: 'relative' }}>
+              <UserCheck size={16} color="var(--text-subtle)" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }} />
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="clean-input"
+                style={{ paddingLeft: '40px' }}
+                placeholder="Your Full Name"
+              />
+            </div>
+          </div>
+
           <div>
             <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
               University Email Address

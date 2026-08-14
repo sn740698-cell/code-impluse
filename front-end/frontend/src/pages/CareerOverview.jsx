@@ -11,9 +11,14 @@ import {
 import { MOCK_CAREER_GOALS } from '../services/api';
 import PerformanceGraph from '../components/PerformanceGraph';
 
-export default function CareerOverview({ studentProfile, onNavigate, onOpenAiChat }) {
+export default function CareerOverview({ studentProfile, currentUser, onNavigate, onOpenAiChat }) {
   const [selectedGoalId, setSelectedGoalId] = useState(1);
-  const activeGoal = MOCK_CAREER_GOALS.find(g => g.id === selectedGoalId) || MOCK_CAREER_GOALS[0];
+  const selectedGoal = MOCK_CAREER_GOALS.find(g => g.id === selectedGoalId) || MOCK_CAREER_GOALS[0];
+  const activeGoal = studentProfile?.target_career
+    ? { ...selectedGoal, name: studentProfile.target_career, description: `Your personalized roadmap is being prepared for ${studentProfile.target_career}.` }
+    : selectedGoal;
+
+  const studentName = studentProfile?.name || currentUser?.name || 'Alex Rivera';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
@@ -27,7 +32,7 @@ export default function CareerOverview({ studentProfile, onNavigate, onOpenAiCha
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
             <div className="badge badge-blue" style={{ marginBottom: '8px' }}>
-              Student Career Overview
+              Student Profile: {studentName}
             </div>
             <h2 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '0 0 6px 0' }}>
               Target Career: <span style={{ color: 'var(--color-brand-primary)' }}>{activeGoal.name}</span>

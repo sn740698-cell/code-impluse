@@ -1,20 +1,49 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   BarChart2, 
-  CheckCircle, 
-  AlertCircle, 
+  CheckCircle2, 
+  AlertTriangle, 
   HelpCircle, 
-  Info, 
   Award, 
   Sparkles, 
   X, 
-  ArrowUpRight 
+  ArrowUpRight,
+  TrendingUp,
+  ShieldAlert
 } from 'lucide-react';
-import { MOCK_STUDENT_SKILLS } from '../services/api';
+import { getStudentSkills, MOCK_STUDENT_SKILLS } from '../services/api';
 
 export default function SkillAnalysis() {
-  const [skills] = useState(MOCK_STUDENT_SKILLS);
+  const [skills, setSkills] = useState(MOCK_STUDENT_SKILLS);
   const [selectedSkill, setSelectedSkill] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadSkills() {
+      try {
+        const data = await getStudentSkills();
+        if (data && data.length > 0) {
+          const formatted = data.map(s => ({
+            name: s.skill || s.name,
+            current: s.proficiency || s.current || 0,
+            required: s.required || 80,
+            gap: Math.max(0, (s.required || 80) - (s.proficiency || s.current || 0)),
+            state: s.state || ((s.proficiency || s.current) >= 70 ? 'Strong' : (s.proficiency || s.current) >= 40 ? 'Developing' : 'Missing'),
+            source: s.source || 'Academic',
+            is_demonstrated: s.demonstrated ?? s.is_demonstrated ?? true,
+            evidence: s.evidence || 'Verified from course records',
+            action: s.action || 'Focus on foundational lab exercises'
+          }));
+          setSkills(formatted);
+        }
+      } catch (err) {
+        console.warn('Failed to load backend skills:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadSkills();
+  }, []);
 
   const getStateBadgeClass = (state) => {
     switch (state) {
@@ -29,29 +58,42 @@ export default function SkillAnalysis() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
       
-      {/* Header */}
-      <div>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0 }}>Part 1.2 — Current Skill Analysis</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', margin: '2px 0 0 0' }}>
-          Distinguishing self-reported from demonstrated proficiency using multi-source evidence
-        </p>
+      {/* Visual Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <BarChart2 size={24} color="var(--color-brand-primary)" /> Skill Matrix & Diagnostic Evidence
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.86rem', margin: '4px 0 0 0' }}>
+            Demonstrated proficiency vs self-reported skill ratings
+          </p>
+        </div>
+
+        {/* Visual Summary Counters */}
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <div className="clean-card" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CheckCircle2 size={16} color="var(--color-emerald)" />
+            <span style={{ fontSize: '0.82rem', fontWeight: 700 }}>
+              {skills.filter(s => s.is_demonstrated).length} Verified
+            </span>
+          </div>
+          <div className="clean-card" style={{ padding: '8px 16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ShieldAlert size={16} color="var(--color-rose)" />
+            <span style={{ fontSize: '0.82rem', fontWeight: 700 }}>
+              {skills.filter(s => s.gap > 30).length} Critical Gaps
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Skill List Cards */}
-      <div className="soft-card" style={{ padding: '24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 700, margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <BarChart2 size={18} color="#60a5fa" /> Demonstrated vs Self-Reported Skills
-          </h3>
-          <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Click any skill row to view detailed evidence</span>
-        </div>
-
+      <div className="clean-card" style={{ padding: '24px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {skills.map((skill, idx) => (
             <div
               key={idx}
               onClick={() => setSelectedSkill(skill)}
-              className="soft-card soft-card-interactive"
+              className="clean-card clean-card-interactive"
               style={{
                 padding: '16px 20px',
                 display: 'flex',
@@ -60,15 +102,15 @@ export default function SkillAnalysis() {
                 background: 'var(--bg-input)'
               }}
             >
-              <div style={{ flex: 1, minWidth: '180px' }}>
+              <div style={{ flex: 1, minWidth: '200px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <h4 style={{ fontSize: '0.98rem', fontWeight: 700, margin: 0 }}>{skill.name}</h4>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>{skill.name}</h4>
                   <span className={`badge ${getStateBadgeClass(skill.state)}`}>
                     {skill.state}
                   </span>
                   {skill.is_demonstrated ? (
-                    <span className="badge badge-purple" style={{ fontSize: '0.68rem' }}>
-                      <CheckCircle size={12} /> Demonstrated
+                    <span className="badge badge-purple" style={{ fontSize: '0.68rem', gap: '4px' }}>
+                      <CheckCircle2 size={12} /> Verified
                     </span>
                   ) : (
                     <span className="badge badge-yellow" style={{ fontSize: '0.68rem' }}>
@@ -77,28 +119,31 @@ export default function SkillAnalysis() {
                   )}
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Source: {skill.source} • Gap: {skill.gap}%
+                  Source: {skill.source}
                 </div>
               </div>
 
-              {/* Progress Bar */}
-              <div style={{ width: '220px', marginRight: '20px' }}>
+              {/* Progress Bar & Visual Gauge */}
+              <div style={{ width: '240px', marginRight: '20px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem', marginBottom: '4px' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Current: {skill.current}%</span>
-                  <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>Req: {skill.required}%</span>
+                  <span style={{ color: 'var(--text-muted)' }}>{skill.current}% proficiency</span>
+                  <span style={{ fontWeight: 700, color: skill.current >= skill.required ? 'var(--color-emerald)' : 'var(--color-brand-primary)' }}>
+                    Target: {skill.required}%
+                  </span>
                 </div>
-                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.06)', borderRadius: 'var(--radius-pill)', overflow: 'hidden' }}>
+                <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.08)', borderRadius: 'var(--radius-pill)', overflow: 'hidden' }}>
                   <div style={{
                     width: `${skill.current}%`,
                     height: '100%',
-                    background: skill.current >= skill.required ? 'var(--accent-emerald)' : 'linear-gradient(90deg, #3b82f6, #a855f7)',
-                    borderRadius: 'var(--radius-pill)'
+                    background: skill.current >= skill.required ? 'var(--color-emerald)' : 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
+                    borderRadius: 'var(--radius-pill)',
+                    transition: 'width 0.5s ease'
                   }} />
                 </div>
               </div>
 
               <button className="btn-ghost" style={{ padding: '6px' }}>
-                <ArrowUpRight size={18} color="#60a5fa" />
+                <ArrowUpRight size={18} color="var(--color-brand-primary)" />
               </button>
             </div>
           ))}
@@ -117,7 +162,7 @@ export default function SkillAnalysis() {
           alignItems: 'center',
           justifyContent: 'center'
         }}>
-          <div className="soft-card" style={{ width: '480px', maxWidth: '90vw', padding: '28px' }}>
+          <div className="clean-card" style={{ width: '480px', maxWidth: '90vw', padding: '28px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <h3 style={{ fontSize: '1.2rem', margin: 0, fontWeight: 700 }}>{selectedSkill.name}</h3>
@@ -131,29 +176,29 @@ export default function SkillAnalysis() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '0.85rem' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', background: 'var(--bg-input)', padding: '12px', borderRadius: 'var(--radius-sm)' }}>
                 <div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>CURRENT PROFICIENCY</div>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#60a5fa' }}>{selectedSkill.current}%</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>CURRENT</div>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-brand-primary)' }}>{selectedSkill.current}%</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>REQUIRED TARGET</div>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#c084fc' }}>{selectedSkill.required}%</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>TARGET</div>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-purple)' }}>{selectedSkill.required}%</div>
                 </div>
                 <div>
-                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>SKILL GAP</div>
-                  <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent-rose)' }}>-{selectedSkill.gap}%</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>GAP</div>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--color-rose)' }}>-{selectedSkill.gap}%</div>
                 </div>
               </div>
 
               <div>
                 <strong style={{ color: 'var(--text-main)', display: 'block', marginBottom: '4px' }}>Evidence Used:</strong>
-                <p style={{ color: 'var(--text-muted)', background: 'rgba(255,255,255,0.03)', padding: '10px', borderRadius: 'var(--radius-sm)', margin: 0 }}>
+                <p style={{ color: 'var(--text-muted)', background: 'var(--bg-input)', padding: '10px', borderRadius: 'var(--radius-sm)', margin: 0 }}>
                   {selectedSkill.evidence}
                 </p>
               </div>
 
               <div>
-                <strong style={{ color: '#fde047', display: 'block', marginBottom: '4px' }}>Recommended Next Action:</strong>
-                <p style={{ color: 'var(--text-main)', background: 'rgba(234,179,8,0.1)', border: '1px solid rgba(234,179,8,0.3)', padding: '10px', borderRadius: 'var(--radius-sm)', margin: 0 }}>
+                <strong style={{ color: 'var(--color-amber)', display: 'block', marginBottom: '4px' }}>Recommended Action:</strong>
+                <p style={{ color: 'var(--text-main)', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '10px', borderRadius: 'var(--radius-sm)', margin: 0 }}>
                   {selectedSkill.action}
                 </p>
               </div>
