@@ -1,9 +1,7 @@
 import json
-import requests
-
-from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from ai.services import AIUnavailable, generate
 
 
 @csrf_exempt
@@ -26,39 +24,17 @@ def chat(request):
                 status=400
             )
 
-        ollama_response = requests.post(
-            settings.OLLAMA_URL,
-            json={
-                "model": settings.OLLAMA_MODEL,
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": user_message
-                    }
-                ],
-                "stream": False
-            },
-            timeout=120
-        )
-
-        ollama_response.raise_for_status()
-
-        result = ollama_response.json()
+        result, provider = generate([{"role": "user", "content": user_message}])
 
         return JsonResponse({
-            "response": result["message"]["content"]
+            "response": result,
+            "provider": provider,
         })
 
-    except requests.exceptions.ConnectionError:
+    except AIUnavailable:
         return JsonResponse(
-            {"error": "Could not connect to Ollama"},
+            {"error": "Neither Ollama nor the configured fallback AI provider is available."},
             status=503
-        )
-
-    except requests.exceptions.Timeout:
-        return JsonResponse(
-            {"error": "Ollama took too long to respond"},
-            status=504
         )
 
     except Exception as e:

@@ -88,17 +88,30 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'hackathon'),
-        'USER': os.getenv('POSTGRES_USER', 'postgres'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-        'HOST': os.getenv('POSTGRES_HOST', '127.0.0.1'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
-        'CONN_MAX_AGE': 60,
+POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD', '')
+USE_SQLITE = os.getenv('USE_SQLITE', '').lower() in ('1', 'true', 'yes')
+
+# PostgreSQL is used whenever credentials are configured. The SQLite fallback keeps
+# a new developer checkout runnable before PostgreSQL has been installed/configured.
+if USE_SQLITE or not POSTGRES_PASSWORD:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB', 'hackathon'),
+            'USER': os.getenv('POSTGRES_USER', 'postgres'),
+            'PASSWORD': POSTGRES_PASSWORD,
+            'HOST': os.getenv('POSTGRES_HOST', '127.0.0.1'),
+            'PORT': os.getenv('POSTGRES_PORT', '5432'),
+            'CONN_MAX_AGE': 60,
+        }
+    }
 
 
 # Password validation
@@ -153,3 +166,12 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 OLLAMA_URL = os.getenv('OLLAMA_URL', 'http://127.0.0.1:11434/api/chat')
 OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'qwen3:8b')
+OLLAMA_TIMEOUT = int(os.getenv('OLLAMA_TIMEOUT', '30'))
+OPENROUTER_URL = os.getenv('OPENROUTER_URL', 'https://openrouter.ai/api/v1/chat/completions')
+OPENROUTER_TIMEOUT = int(os.getenv('OPENROUTER_TIMEOUT', '45'))
+OPENROUTER_NVIDIA_API_KEY = os.getenv('OPENROUTER_NVIDIA_API_KEY', '')
+OPENROUTER_GEMMA_API_KEY = os.getenv('OPENROUTER_GEMMA_API_KEY', '')
+OPENROUTER_CHATGPT_API_KEY = os.getenv('OPENROUTER_CHATGPT_API_KEY', '')
+OPENROUTER_NVIDIA_MODEL = os.getenv('OPENROUTER_NVIDIA_MODEL', 'nvidia/nemotron-3-nano-30b-a3b:free')
+OPENROUTER_GEMMA_MODEL = os.getenv('OPENROUTER_GEMMA_MODEL', 'google/gemma-3-27b-it:free')
+OPENROUTER_CHATGPT_MODEL = os.getenv('OPENROUTER_CHATGPT_MODEL', 'openai/gpt-oss-20b:free')
