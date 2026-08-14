@@ -186,3 +186,91 @@ def student_telemetry(request):
         "avg_skill": avg_skill
     })
 
+
+@require_GET
+def teacher_students(request):
+    students_data = [
+        {
+            "id": 1,
+            "name": "Alex Rivera",
+            "email": "alex.rivera@university.edu",
+            "career_goal": "Cybersecurity Engineer",
+            "readiness": 58,
+            "status": "good_standing",
+            "lacking_skills": ["Networking Fundamentals (25%)", "Linux Administration (30%)"],
+            "strongest_skill": "Python Programming (65%)",
+            "gpa": "3.84",
+            "last_active": "2 hours ago",
+            "performance_history": [
+                {"month": "Jan", "readiness": 42, "gpa": 3.65, "skills": 35},
+                {"month": "Feb", "readiness": 48, "gpa": 3.70, "skills": 42},
+                {"month": "Mar", "readiness": 52, "gpa": 3.78, "skills": 50},
+                {"month": "Apr", "readiness": 55, "gpa": 3.80, "skills": 54},
+                {"month": "May", "readiness": 58, "gpa": 3.84, "skills": 58},
+                {"month": "Jun", "readiness": 65, "gpa": 3.85, "skills": 62}
+            ]
+        },
+        {
+            "id": 2,
+            "name": "Jordan Lee",
+            "email": "jordan.lee@university.edu",
+            "career_goal": "Full Stack AI Engineer",
+            "readiness": 64,
+            "status": "needs_attention",
+            "lacking_skills": ["Database SQL Indexing (30%)", "Vector Search (40%)"],
+            "strongest_skill": "React & TypeScript (85%)",
+            "gpa": "3.52",
+            "last_active": "1 day ago",
+            "performance_history": [
+                {"month": "Jan", "readiness": 40, "gpa": 3.40, "skills": 38},
+                {"month": "Feb", "readiness": 46, "gpa": 3.45, "skills": 44},
+                {"month": "Mar", "readiness": 52, "gpa": 3.48, "skills": 50},
+                {"month": "Apr", "readiness": 58, "gpa": 3.50, "skills": 56},
+                {"month": "May", "readiness": 64, "gpa": 3.52, "skills": 62},
+                {"month": "Jun", "readiness": 70, "gpa": 3.55, "skills": 68}
+            ]
+        },
+        {
+            "id": 3,
+            "name": "Morgan Taylor",
+            "email": "morgan.taylor@university.edu",
+            "career_goal": "Data Scientist",
+            "readiness": 42,
+            "status": "at_risk",
+            "lacking_skills": ["Statistics & Probability (20%)", "PyTorch (25%)"],
+            "strongest_skill": "Python Data Analysis (55%)",
+            "gpa": "3.10",
+            "last_active": "5 days ago",
+            "performance_history": [
+                {"month": "Jan", "readiness": 30, "gpa": 3.00, "skills": 28},
+                {"month": "Feb", "readiness": 34, "gpa": 3.05, "skills": 32},
+                {"month": "Mar", "readiness": 38, "gpa": 3.08, "skills": 35},
+                {"month": "Apr", "readiness": 40, "gpa": 3.10, "skills": 38},
+                {"month": "May", "readiness": 42, "gpa": 3.10, "skills": 40},
+                {"month": "Jun", "readiness": 48, "gpa": 3.15, "skills": 45}
+            ]
+        },
+        {
+            "id": 4,
+            "name": "Sam Chen",
+            "email": "sam.chen@university.edu",
+            "career_goal": "Cloud Infrastructure Architect",
+            "readiness": 78,
+            "status": "good_standing",
+            "lacking_skills": ["Kubernetes Security (45%)"],
+            "strongest_skill": "AWS & Terraform (90%)",
+            "gpa": "3.92",
+            "last_active": "30 mins ago",
+            "performance_history": [
+                {"month": "Jan", "readiness": 55, "gpa": 3.80, "skills": 50},
+                {"month": "Feb", "readiness": 62, "gpa": 3.84, "skills": 58},
+                {"month": "Mar", "readiness": 68, "gpa": 3.88, "skills": 65},
+                {"month": "Apr", "readiness": 72, "gpa": 3.90, "skills": 70},
+                {"month": "May", "readiness": 78, "gpa": 3.92, "skills": 76},
+                {"month": "Jun", "readiness": 85, "gpa": 3.95, "skills": 82}
+            ]
+        }
+    ]
+    return JsonResponse({"results": students_data})
+
+

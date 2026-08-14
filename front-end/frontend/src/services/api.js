@@ -423,6 +423,11 @@ export async function getStudentTelemetry() {
   return data?.results && data.results.length > 0 ? data.results : null;
 }
 
+export async function getTeacherStudents() {
+  const data = await fetchApi('/teacher/students/');
+  return data?.results && data.results.length > 0 ? data.results : null;
+}
+
 export async function getSkillRoadmap() {
   const data = await fetchApi('/student/roadmap/');
   return (data?.results && data.results.length > 0) ? data.results : MOCK_CAREER_ROADMAP;
