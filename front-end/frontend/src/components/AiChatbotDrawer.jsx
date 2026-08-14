@@ -13,12 +13,95 @@ import {
 } from 'lucide-react';
 import { sendChatMessage } from '../services/api';
 
+function parseBoldText(text) {
+  if (!text) return null;
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, idx) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={idx} style={{ fontWeight: 700, color: 'var(--text-main)' }}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+}
+
+function FormattedAiResponse({ text }) {
+  if (!text) return null;
+
+  // 1. Clean HTML line breaks & broken tags
+  let cleanText = text.replace(/<br\s*\/?>/gi, '\n').replace(/<\/?p>/gi, '\n');
+
+  // 2. Format or strip markdown table syntax
+  if (cleanText.includes('|')) {
+    cleanText = cleanText
+      .split('\n')
+      .filter(line => !line.trim().startsWith('|---') && !line.trim().startsWith('| ---'))
+      .map(line => {
+        if (line.includes('|')) {
+          const cells = line.split('|').map(c => c.trim()).filter(Boolean);
+          if (cells.length >= 2) {
+            return `• **${cells[0]}**: ${cells.slice(1).join(' — ')}`;
+          }
+          return cells.join(' ');
+        }
+        return line;
+      })
+      .join('\n');
+  }
+
+  // 3. Divide into clean section blocks
+  const blocks = cleanText.split('\n\n').filter(b => b.trim());
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {blocks.map((block, bIdx) => {
+        const lines = block.split('\n').filter(l => l.trim());
+        return (
+          <div key={bIdx} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {lines.map((line, lIdx) => {
+              const trimmed = line.trim();
+              const isHeader = trimmed.startsWith('#') || (trimmed.startsWith('**') && trimmed.endsWith('**') && trimmed.length < 65);
+              const isBullet = trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*') || /^\d+\./.test(trimmed);
+
+              if (isHeader) {
+                const headerText = trimmed.replace(/^[#*\s]+|[#*\s]+$/g, '');
+                return (
+                  <h4 key={lIdx} style={{ fontSize: '0.94rem', fontWeight: 800, color: 'var(--color-brand-primary)', margin: '4px 0 2px 0' }}>
+                    {headerText}
+                  </h4>
+                );
+              }
+
+              if (isBullet) {
+                const bulletContent = trimmed.replace(/^[•\-*\d.\s]+/, '');
+                return (
+                  <div key={lIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', paddingLeft: '2px' }}>
+                    <span style={{ color: 'var(--color-purple)', fontWeight: 800, lineHeight: 1.4, fontSize: '0.9rem' }}>•</span>
+                    <div style={{ fontSize: '0.86rem', lineHeight: 1.5, flex: 1 }}>
+                      {parseBoldText(bulletContent)}
+                    </div>
+                  </div>
+                );
+              }
+
+              return (
+                <p key={lIdx} style={{ fontSize: '0.86rem', lineHeight: 1.5, margin: 0 }}>
+                  {parseBoldText(trimmed)}
+                </p>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function AiChatbotDrawer({ isOpen, onClose }) {
   const [messages, setMessages] = useState([
     {
       id: 1,
       sender: 'bot',
-      text: "Hello Alex! I am your AI Career Compass Advisor powered by Qwen 3:8B & OpenRouter. Ask me anything about your career path, skill gaps, or schedule balance!",
+      text: "Hello Alex! I am your AI Career Compass Advisor. How can I assist your career path today?",
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -89,8 +172,8 @@ export default function AiChatbotDrawer({ isOpen, onClose }) {
       transition: 'all 0.3s ease'
     }}>
       <div style={{
-        width: '480px',
-        maxWidth: '92vw',
+        width: '490px',
+        maxWidth: '94vw',
         height: '100vh',
         background: 'var(--bg-surface)',
         display: 'flex',
@@ -162,7 +245,7 @@ export default function AiChatbotDrawer({ isOpen, onClose }) {
                 display: 'flex',
                 gap: '10px',
                 alignSelf: msg.sender === 'user' ? 'flex-end' : 'flex-start',
-                maxWidth: '88%'
+                maxWidth: '90%'
               }}
             >
               {msg.sender === 'bot' && (
@@ -191,14 +274,18 @@ export default function AiChatbotDrawer({ isOpen, onClose }) {
                 fontSize: '0.88rem',
                 lineHeight: 1.6,
                 border: msg.sender === 'bot' ? '1px solid rgba(139, 92, 246, 0.35)' : 'none',
-                boxShadow: msg.sender === 'user' ? '0 4px 14px rgba(59, 130, 246, 0.3)' : '0 2px 10px rgba(0,0,0,0.1)'
+                boxShadow: msg.sender === 'user' ? '0 4px 14px rgba(59, 130, 246, 0.3)' : '0 2px 10px rgba(0,0,0,0.1)',
+                overflowX: 'hidden'
               }}>
-                <div style={{ whiteSpace: 'pre-line', fontWeight: msg.sender === 'user' ? 600 : 400 }}>
-                  {msg.text}
-                </div>
+                {msg.sender === 'bot' ? (
+                  <FormattedAiResponse text={msg.text} />
+                ) : (
+                  <div style={{ fontWeight: 600 }}>{msg.text}</div>
+                )}
+
                 <div style={{
                   fontSize: '0.68rem',
-                  opacity: 0.8,
+                  opacity: 0.85,
                   marginTop: '8px',
                   textAlign: 'right',
                   fontWeight: 600,
