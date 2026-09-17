@@ -134,5 +134,5 @@ This project was developed during the **Smart India Hackathon (SIH) Internal Hac
 
 ## 📄 License & Acknowledgments
 
-- Built with ❤️ by the **AI Career Compass Team**.
+- Built with ❤️ by the team **CODE-IMPULSE** - an AI-powered student and teacher monitoring dashboard.
 - Special thanks to the SIH Internal Hackathon mentors and evaluators.
