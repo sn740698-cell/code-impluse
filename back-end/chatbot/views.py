@@ -1,14 +1,43 @@
+import re
 import json
 from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from ai.services import AIUnavailable, generate
-from goals.services import active_goal, readiness, skill_gaps
-from students.models import StudentSkill, StudentCareerGoal, MilestoneProgress
-from academics.models import ScheduleCommitment
-from opportunities.models import OpportunityInteraction
+from ai.vector_store import db
+from ai.ingestion import index_student_dashboard_data
 
 User = get_user_model()
+
+
+def is_valid_input(text):
+    """Validate user input and reject garbage, gibberish, spam, or unnecessary random strings."""
+    if not text or len(text.strip()) < 2:
+        return False, "Input is too short. Please provide a meaningful question or prompt."
+
+    text_clean = text.strip()
+
+    # Reject pure punctuation or special characters
+    if not re.search(r"[a-zA-Z0-9]", text_clean):
+        return False, "Input contains no valid words or numbers. Please ask a relevant question."
+
+    # Reject repeated single character spam (e.g. 'aaaaaaa', '???????', '1111111')
+    if len(set(text_clean.lower())) == 1 and len(text_clean) > 3:
+        return False, "Repeated character pattern detected. Please enter a valid question."
+
+    # Reject keyboard mash gibberish (e.g. 'asdfghjkl', 'qwertyuiop', 'zxcvbnm', 'fghjklsd')
+    words = re.findall(r"[a-zA-Z]+", text_clean.lower())
+    if words:
+        keyboard_mashes = {"asdfghjkl", "qwertyuiop", "zxcvbnm", "asdfghjk", "fghjklsd", "qwertyui", "lkjhgfdsa"}
+        vowels = set("aeiouy")
+        for word in words:
+            if word in keyboard_mashes:
+                return False, "Unnecessary or gibberish input detected. Please ask a relevant career or academic question."
+            # Check for words with zero vowels and length > 5 (likely gibberish like 'bcdfghjklmn')
+            if len(word) > 5 and not any(char in vowels for char in word):
+                return False, "Unnecessary or unreadable text detected. Please ask a clear question."
+
+    return True, ""
 
 
 def get_active_user(request):
@@ -27,79 +56,44 @@ def chat(request):
         data = json.loads(request.body)
         user_message = data.get("message", "").strip()
 
-        if not user_message:
-            return JsonResponse({"error": "Message is required"}, status=400)
+        # Input Validation & Garbage Data Rejection
+        is_valid, err_msg = is_valid_input(user_message)
+        if not is_valid:
+            return JsonResponse({"error": err_msg}, status=400)
 
         # 1. Resolve student from request user or fallback demo user
         user = get_active_user(request)
         profile_override = data.get("profile") or {}
+        student_id = str(user.id) if user and hasattr(user, "id") and user.id else "demo_user"
 
-        # 2. Extract Name
+        # 2. Ingest & index dynamic student info + dashboard data into Vector DB
+        index_student_dashboard_data(user, profile_override)
+
+        # 3. Vector Similarity Search - Retrieve Top Relevant Facts/Documents
+        retrieved_docs = db.search_similar(user_message, student_id=student_id, top_k=4)
+
+        context_lines = []
+        for d in retrieved_docs:
+            context_lines.append(f"[{d['category'].upper()}] {d['content']} (Similarity: {d['similarity']})")
+
+        vector_context_text = "\n".join(context_lines) if context_lines else "No specific vector context matched."
+
         user_name = profile_override.get("name") or (user.get_full_name().strip() if (user and hasattr(user, "get_full_name")) else "Alex Rivera")
         if not user_name:
             user_name = "Alex Rivera"
 
-        # 3. Extract Target Career & Readiness
-        goal_info = profile_override.get("target_career")
-        if not goal_info and user:
-            g = active_goal(user)
-            if g:
-                goal_info = g.career.name
-        if not goal_info:
-            goal_info = "Cybersecurity Engineer"
-
-        readiness_score = readiness(user) if user else 58
-
-        # 4. Extract Recorded Student Skills
-        student_skills_list = []
-        if user:
-            for s in StudentSkill.objects.filter(student=user).select_related("skill"):
-                student_skills_list.append(f"{s.skill.name}: {s.proficiency}%")
-        if profile_override.get("skills"):
-            for s in profile_override["skills"]:
-                if isinstance(s, dict):
-                    student_skills_list.append(f"{s.get('name')}: {s.get('proficiency')}%")
-
-        skills_summary = ", ".join(student_skills_list) if student_skills_list else "Python: 65%, Linux: 30%, Networking: 25%"
-
-        # 5. Extract Skill Gaps
-        g_list = skill_gaps(user) if user else []
-        if g_list:
-            gaps_summary = ", ".join([f"{x.get('skill', '')} (gap: {x.get('gap', '')}%)" for x in g_list[:3]])
-        else:
-            gaps_summary = "Security Fundamentals (65% gap), Networking (55% gap), Linux Admin (45% gap)"
-
-        # 6. Extract Academic Commitments & Recovery Plans
-        commitments = []
-        if user:
-            for c in ScheduleCommitment.objects.filter(student=user):
-                commitments.append(f"{c.title} ({c.commitment_type})")
-        commit_summary = ", ".join(commitments) if commitments else "DBMS Recovery Plan (7 hrs/week), DBMS Exam on Aug 24th"
-
-        # 7. Extract Registered Opportunities
-        registered_opps = []
-        if user:
-            for interaction in OpportunityInteraction.objects.filter(student=user, status__in=["registered", "saved"]).select_related("opportunity"):
-                registered_opps.append(interaction.opportunity.title)
-        opp_summary = ", ".join(registered_opps) if registered_opps else "Networking Fundamentals Workshop (Aug 22nd, 91% match)"
-
-        # Construct Dynamic AI System Context
+        # Construct RAG System Prompt
         system_prompt = (
             f"You are the AI Career Compass & Academic Advisor for {user_name}.\n"
-            f"DYNAMIC STUDENT DATA RECORD:\n"
-            f"- Student Name: {user_name}\n"
-            f"- Target Career Goal: {goal_info}\n"
-            f"- Career Readiness Index: {readiness_score}%\n"
-            f"- Recorded Skills: {skills_summary}\n"
-            f"- Identified Skill Gaps: {gaps_summary}\n"
-            f"- Academic Commitments: {commit_summary}\n"
-            f"- Saved/Registered Opportunities: {opp_summary}\n\n"
-            "FORMATTING GUIDELINES:\n"
+            f"RETRIEVED VECTOR DATABASE CONTEXT (RAG search results for '{user_message}'):\n"
+            f"{vector_context_text}\n\n"
+            "FORMATTING & RESPONSE GUIDELINES:\n"
             "1. Make responses MINIMAL, EASY TO UNDERSTAND, and CONCISE (under 120 words).\n"
-            "2. NEVER use markdown tables (no | column | syntax).\n"
-            "3. NEVER use HTML tags like <br>.\n"
-            "4. Use clean bullet points with emojis (🎯, 💡, ⚡).\n"
-            "5. Use bold font for key terms and metrics."
+            "2. Directly answer using the RETRIEVED VECTOR DATABASE CONTEXT above.\n"
+            "3. NEVER use markdown tables (no | column | syntax).\n"
+            "4. NEVER use HTML tags like <br>.\n"
+            "5. Use clean bullet points with emojis (🎯, 💡, ⚡).\n"
+            "6. Use bold font for key terms and metrics."
         )
 
         messages = [
@@ -112,6 +106,7 @@ def chat(request):
         return JsonResponse({
             "response": result,
             "provider": provider,
+            "vector_context": retrieved_docs
         })
 
     except AIUnavailable:

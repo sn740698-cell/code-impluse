@@ -16,21 +16,40 @@ def _openrouter_configs():
     )
 
 
+def get_embedding(text):
+    """Return vector embedding for text using vector_store dense feature vectorizer."""
+    from ai.vector_store import generate_dense_embedding
+    return generate_dense_embedding(text)
+
+
 def generate(messages, *, json_mode=False):
     """Return ``(content, provider)``. Provider failures never expose secrets."""
-    # 1. Try Local Ollama first
+    # 1. Try Local Ollama first (targeting qwen3:4b)
     try:
-        payload = {"model": settings.OLLAMA_MODEL, "messages": messages, "stream": False}
+        model_name = getattr(settings, "OLLAMA_MODEL", "qwen3:4b")
+        payload = {
+            "model": model_name,
+            "messages": messages,
+            "stream": False,
+            "options": {
+                "num_predict": 600,
+                "temperature": 0.7
+            }
+        }
         if json_mode:
             payload["format"] = "json"
         response = requests.post(settings.OLLAMA_URL, json=payload, timeout=settings.OLLAMA_TIMEOUT)
         if response.status_code == 200:
             data = response.json()
-            content = data.get("message", {}).get("content", "").strip()
+            msg = data.get("message", {})
+            content = msg.get("content", "").strip()
+            # If Qwen 3 thinking token output consumed response, fallback to thinking text
+            if not content and msg.get("thinking"):
+                content = msg.get("thinking", "").strip()
             if content:
-                return content, "ollama"
-    except Exception:
-        pass
+                return content, f"ollama ({model_name})"
+    except Exception as e:
+        print(f"[AI Service Error] Ollama exception: {type(e).__name__}: {e}", flush=True)
 
     # 2. Fallback to OpenRouter models
     for api_key, model in _openrouter_configs():

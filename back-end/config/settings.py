@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-738cxp&+(95oo^-j4m+bke0=$)5n$mno2f!-rif^!l21^d#na-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -89,7 +89,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
 POSTGRES_PASSWORD = os.getenv('POSTGRES_PASSWORD', '')
-USE_SQLITE = os.getenv('USE_SQLITE', '').lower() in ('1', 'true', 'yes')
+USE_SQLITE = os.getenv('USE_SQLITE', '').strip().lower() in ('1', 'true', 'yes')
 
 # PostgreSQL is used whenever credentials are configured. The SQLite fallback keeps
 # a new developer checkout runnable before PostgreSQL has been installed/configured.
@@ -110,6 +110,9 @@ else:
             'HOST': os.getenv('POSTGRES_HOST', '127.0.0.1'),
             'PORT': os.getenv('POSTGRES_PORT', '5432'),
             'CONN_MAX_AGE': 60,
+            'OPTIONS': {
+                'connect_timeout': 3,
+            },
         }
     }
 
@@ -208,13 +211,13 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 LOGIN_URL = '/api/accounts/login/'
 OLLAMA_URL = os.getenv('OLLAMA_URL', 'http://127.0.0.1:11434/api/chat')
-OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'qwen3:8b')
-OLLAMA_TIMEOUT = int(os.getenv('OLLAMA_TIMEOUT', '30'))
+OLLAMA_MODEL = os.getenv('OLLAMA_MODEL', 'qwen3:4b')
+OLLAMA_TIMEOUT = int(os.getenv('OLLAMA_TIMEOUT', '120'))
 OPENROUTER_URL = os.getenv('OPENROUTER_URL', 'https://openrouter.ai/api/v1/chat/completions')
 OPENROUTER_TIMEOUT = int(os.getenv('OPENROUTER_TIMEOUT', '45'))
 OPENROUTER_NVIDIA_API_KEY = os.getenv('OPENROUTER_NVIDIA_API_KEY', '')
 OPENROUTER_GEMMA_API_KEY = os.getenv('OPENROUTER_GEMMA_API_KEY', '')
 OPENROUTER_CHATGPT_API_KEY = os.getenv('OPENROUTER_CHATGPT_API_KEY', '')
-OPENROUTER_NVIDIA_MODEL = os.getenv('OPENROUTER_NVIDIA_MODEL', 'nvidia/nemotron-3-nano-30b-a3b:free')
-OPENROUTER_GEMMA_MODEL = os.getenv('OPENROUTER_GEMMA_MODEL', 'google/gemma-3-27b-it:free')
-OPENROUTER_CHATGPT_MODEL = os.getenv('OPENROUTER_CHATGPT_MODEL', 'openai/gpt-oss-20b:free')
+OPENROUTER_NVIDIA_MODEL = os.getenv('OPENROUTER_NVIDIA_MODEL', 'meta-llama/llama-3.3-70b-instruct:free')
+OPENROUTER_GEMMA_MODEL = os.getenv('OPENROUTER_GEMMA_MODEL', 'google/gemma-2-9b-it:free')
+OPENROUTER_CHATGPT_MODEL = os.getenv('OPENROUTER_CHATGPT_MODEL', 'qwen/qwen-2.5-7b-instruct:free')
